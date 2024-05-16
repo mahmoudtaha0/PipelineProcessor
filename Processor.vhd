@@ -123,9 +123,11 @@ ARCHITECTURE my_model OF Processor IS
 	END COMPONENT;
 	COMPONENT DataMemory IS
 		PORT (
-			rst, memoryWrite, memoryRead, clk : IN STD_LOGIC;
+			rst, memoryWrite, memoryRead, clk, protect_enable, free_enable, push_en, pop_en, call_en, ret_en : IN STD_LOGIC;
 			writeData, Add : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
+			PC : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
 			readData, PC_out : OUT STD_LOGIC_VECTOR(31 DOWNTO 0);
+			violation_signal : OUT STD_LOGIC;
 			INT, RTI : IN STD_LOGIC;
 			CCR : IN STD_LOGIC_VECTOR(3 DOWNTO 0);
 			CCR_out : OUT STD_LOGIC_VECTOR(3 DOWNTO 0)
@@ -154,8 +156,9 @@ ARCHITECTURE my_model OF Processor IS
 	COMPONENT Controller IS
 		PORT (
 			opcode : IN STD_LOGIC_VECTOR(6 DOWNTO 0);
-			reset_input, ZF : IN STD_LOGIC;
-			jump, jumpZ, rst, immEnable, immFlush, memoryWrite, memoryRead, returnEnable, callEnable, aluImm, writeEnable, alu_enable, oneoperand, swap_enable : OUT STD_LOGIC;
+			reset_input : IN STD_LOGIC;
+			ZF : IN STD_LOGIC;
+			jump, jumpZ, rst, immEnable, immFlush, memoryWrite, memoryRead, returnEnable, callEnable, aluImm, writeEnable, alu_enable, oneoperand, swap_enable, protect_enable, free_enable, push_enable, pop_enable : OUT STD_LOGIC;
 			opcode_to_alu : OUT STD_LOGIC_VECTOR(6 DOWNTO 0);
 			INT, RTI : OUT STD_LOGIC
 		);
@@ -202,7 +205,7 @@ ARCHITECTURE my_model OF Processor IS
 	SIGNAL data_FDBuffer_regFile : STD_LOGIC_VECTOR (8 DOWNTO 0);
 	SIGNAL op_code_FDBuffer_RegFile : STD_LOGIC_VECTOR (1 DOWNTO 0);
 	SIGNAL jump_controller, jumpZ_controller, rst_controller, immEnable_controller : STD_LOGIC;
-	SIGNAL immFlush_controller, memoryWrite_controller, memoryRead_controller, returnEnable_controller, INT_controller, RTI_controller : STD_LOGIC;
+	SIGNAL immFlush_controller, memoryWrite_controller, memoryRead_controller, returnEnable_controller, INT_controller, RTI_controller, push_controller, pop_controller, protect_controller, free_controller : STD_LOGIC;
 	SIGNAL DE_INT, EM_INT, DE_RTI, EM_RTI : STD_LOGIC;
 	SIGNAL callEnable_controller, aluImm_controller, writeEnable_controller, alu_enable_controller, reg_file_mux_sel : STD_LOGIC;
 	SIGNAL writedata_WBBuffer_RefFile, ReadData1_RegFile_DEBuffer, ReadData2_RegFile_DEBuffer, Alu_Imm_mux : STD_LOGIC_VECTOR (31 DOWNTO 0);
@@ -266,14 +269,14 @@ BEGIN
 		memoryRead => memoryRead_controller, returnEnable => returnEnable_controller,
 		callEnable => callEnable_controller, aluImm => aluImm_controller, writeEnable => writeEnable_controller,
 		alu_enable => alu_enable_controller, opcode_to_alu => op_code_controller_alu, oneoperand => reg_file_mux_sel, INT => INT_controller, RTI => RTI_controller, ZF => CCR_signal(0),
-		swap_enable => SWAP_EN);
+		swap_enable => SWAP_EN, push_enable => push_controller, pop_enable => pop_controller, protect_enable => protect_controller, free_enable => free_controller);
 
 	U6 : mux2_3bits PORT MAP(
 		in0 => data_FDBuffer_regFile(8 DOWNTO 6), in1 => data_FDBuffer_regFile(2 DOWNTO 0), sel => reg_file_mux_sel,
 		out1 => reg_file_mux_out);
 
 	U7 : register_file PORT MAP(
-		clk => clk, rst => reset, write_enable => Write_Enable_MWBuffer_Mux, write_addr1 => writeAdd_WBBuffer_RefFile, write_addr2 => data_FDBuffer_regFile(2 downto 0),
+		clk => clk, rst => reset, write_enable => Write_Enable_MWBuffer_Mux, write_addr1 => writeAdd_WBBuffer_RefFile, write_addr2 => data_FDBuffer_regFile(2 DOWNTO 0),
 		read_addr_1 => reg_file_mux_out, read_addr_2 => data_FDBuffer_regFile(5 DOWNTO 3),
 		write_data1 => writedata_WBBuffer_RefFile, write_data2 => write_data2_regfile, read_data_1 => ReadData1_RegFile_DEBuffer, read_data_2 => ReadData2_RegFile_DEBuffer, swap_enable => SWAP_EN);
 
@@ -308,7 +311,8 @@ BEGIN
 	U13 : DataMemory PORT MAP(
 		rst => rst_controller, memoryWrite => Memory_write_EMBuffer_DataMemory, memoryRead => Memory_Read_EMBuffer_DataMemory,
 		clk => clk, Add => AluResult_EMBuffer_DataMemory, writeData => ReadData1_EM_Buffer,
-		readData => ReadData_DataMemory_MWBuffer, INT => EM_INT, RTI => EM_RTI, CCR => CCR_EM, CCR_out => CCR_DM, PC_out => PC_OP
+		readData => ReadData_DataMemory_MWBuffer, INT => EM_INT, RTI => EM_RTI, CCR => CCR_EM, CCR_out => CCR_DM, PC_out => PC_OP, protect_enable => protect_controller, free_enable => free_controller, push_en => push_controller, pop_en => pop_controller,
+		call_en => callEnable_controller, ret_en => returnEnable_controller, PC => PC
 	);
 
 	U14 : CCR PORT MAP(CCR_IN => CCR_DM, CCR_OUT => CCR_OP);
