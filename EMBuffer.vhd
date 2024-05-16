@@ -8,13 +8,13 @@ ENTITY EMBuffer IS
 		clk, write_enable, reset, memoryread, memorywrite : IN STD_LOGIC;
 		writeRegAddr : IN STD_LOGIC_VECTOR (2 DOWNTO 0);
 		--return_enable,call_enable,overflow,zeroflag : in std_logic;;
-		alu_result, datain : IN STD_LOGIC_VECTOR (31 DOWNTO 0); --readdata2 ely tal3 mn register file 3shan yro7 ll data memory
+		alu_result, datain1, datain2 : IN STD_LOGIC_VECTOR (31 DOWNTO 0); --readdata2 ely tal3 mn register file 3shan yro7 ll data memory
 		--pc: in std_logic_vector (31 downto 0);
 		imm_value : IN STD_LOGIC_VECTOR (31 DOWNTO 0);
 		imm_enable : IN STD_LOGIC;
 		--outputs
 		write_enable_out, memoryread_out, memorywrite_out : OUT STD_LOGIC;
-		alu_result_out, dataout : OUT STD_LOGIC_VECTOR (31 DOWNTO 0);
+		alu_result_out, dataout1, dataout2 : OUT STD_LOGIC_VECTOR (31 DOWNTO 0);
 		imm_value_out : OUT STD_LOGIC_VECTOR (31 DOWNTO 0);
 		imm_enable_out : OUT STD_LOGIC;
 		--return_enable_out,call_enable_out,overflow_out,zeroflag_out: out std_logic;
@@ -43,7 +43,8 @@ BEGIN
 			imm_value_out <= (OTHERS => '0');
 			imm_enable_out <= '0';
 			alu_result_out <= (OTHERS => '0');
-			dataout <= (OTHERS => '0');
+			dataout1 <= (OTHERS => '0');
+			dataout2 <= (others => '0');
 			--overflow_out<= '0';
 			--zeroflag_out<= '0';
 			writeRegAddr_out <= (OTHERS => '0');
@@ -60,7 +61,8 @@ BEGIN
 				imm_value_out <= imm_value;
 				imm_enable_out <= imm_enable;
 				alu_result_out <= alu_result;
-				dataout <= datain;
+				dataout1 <= datain1;
+				dataout2 <= datain2;
 				--overflow_out<= overflow;
 				--zeroflag_out<= zeroflag;
 				writeRegAddr_out <= writeRegAddr;

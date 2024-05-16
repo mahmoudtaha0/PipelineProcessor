@@ -7,7 +7,7 @@ ENTITY Controller IS
 		opcode : IN STD_LOGIC_VECTOR(6 DOWNTO 0);
 		reset_input : IN STD_LOGIC;
 		ZF : IN STD_LOGIC;
-		jump, jumpZ, rst, immEnable, immFlush, memoryWrite, memoryRead, returnEnable, callEnable, aluImm, writeEnable, alu_enable,oneoperand : OUT STD_LOGIC;
+		jump, jumpZ, rst, immEnable, immFlush, memoryWrite, memoryRead, returnEnable, callEnable, aluImm, writeEnable, alu_enable, oneoperand, swap_enable : OUT STD_LOGIC;
 		opcode_to_alu : OUT STD_LOGIC_VECTOR(6 DOWNTO 0);
 		INT, RTI : OUT STD_LOGIC
 	);
@@ -30,7 +30,7 @@ BEGIN
 			aluImm <= '0';
 			writeEnable <= '0';
 			alu_enable <= '0';
-			oneoperand <='0';
+			oneoperand <= '0';
 			INT <= '0';
 			RTI <= '0';
 
@@ -49,7 +49,7 @@ BEGIN
 					aluImm <= '0';
 					writeEnable <= '0';
 					alu_enable <= '0';
-					oneoperand <='0';
+					oneoperand <= '0';
 					INT <= '0';
 					RTI <= '0';
 				WHEN "0000001" => --reset
@@ -65,10 +65,44 @@ BEGIN
 					aluImm <= '0';
 					writeEnable <= '0';
 					alu_enable <= '0';
-					oneoperand <='0';
+					oneoperand <= '0';
 					INT <= '0';
 					RTI <= '0';
-				WHEN "0101001" | "0101000" =>  --swap|move
+				WHEN "0101001" => -- SWAP
+					rst <= '0';
+					jump <= '0';
+					jumpZ <= '0';
+					immEnable <= '0';
+					immFlush <= '0';
+					memoryWrite <= '0';
+					memoryRead <= '0';
+					returnEnable <= '0';
+					callEnable <= '0';
+					aluImm <= '0';
+					writeEnable <= '1';
+					swap_enable <= '1';
+					alu_enable <= '0';
+					oneoperand <= '0';
+					INT <= '0';
+					RTI <= '0';
+				WHEN "0101000" => --move
+					rst <= '0';
+					jump <= '0';
+					jumpZ <= '0';
+					immEnable <= '0';
+					immFlush <= '0';
+					memoryWrite <= '0';
+					memoryRead <= '0';
+					returnEnable <= '0';
+					callEnable <= '0';
+					aluImm <= '0';
+					writeEnable <= '1';
+					swap_enable <= '0';
+					alu_enable <= '0';
+					oneoperand <= '0';
+					INT <= '0';
+					RTI <= '0';
+				WHEN "0001101" => --in
 					rst <= '0';
 					jump <= '0';
 					jumpZ <= '0';
@@ -81,26 +115,10 @@ BEGIN
 					aluImm <= '0';
 					writeEnable <= '1';
 					alu_enable <= '0';
-					oneoperand <='0';
+					oneoperand <= '1';
 					INT <= '0';
 					RTI <= '0';
-				WHEN "0001101"  => --in
-					rst <= '0';
-					jump <= '0';
-					jumpZ <= '0';
-					immEnable <= '0';
-					immFlush <= '0';
-					memoryWrite <= '0';
-					memoryRead <= '0';
-					returnEnable <= '0';
-					callEnable <= '0';
-					aluImm <= '0';
-					writeEnable <= '1';
-					alu_enable <= '0';
-					oneoperand <='1';
-					INT <= '0';
-					RTI <= '0';
-				WHEN "0110000" | "0110001" | "0110010" |"0110011" | "0110100" => --add|sub|and|or|xor
+				WHEN "0110000" | "0110001" | "0110010" | "0110011" | "0110100" => --add|sub|and|or|xor
 					rst <= '0';
 					jump <= '0';
 					jumpZ <= '0';
@@ -113,7 +131,7 @@ BEGIN
 					aluImm <= '0';
 					writeEnable <= '1';
 					alu_enable <= '1';
-					oneoperand <='0';
+					oneoperand <= '0';
 					INT <= '0';
 					RTI <= '0';
 				WHEN "0001011" | "0001010" | "0001001" | "0001000" => --dec|inc|neg|not
@@ -129,7 +147,7 @@ BEGIN
 					aluImm <= '0';
 					writeEnable <= '1';
 					alu_enable <= '1';
-					oneoperand <='1';
+					oneoperand <= '1';
 					INT <= '0';
 					RTI <= '0';
 				WHEN "0001100" => --out
@@ -145,7 +163,7 @@ BEGIN
 					aluImm <= '0';
 					writeEnable <= '0';
 					alu_enable <= '0';
-					oneoperand <='1';
+					oneoperand <= '1';
 					INT <= '0';
 					RTI <= '0';
 				WHEN "0100000" => --cmp
@@ -161,7 +179,7 @@ BEGIN
 					aluImm <= '0';
 					writeEnable <= '0';
 					alu_enable <= '1';
-					oneoperand <='0';
+					oneoperand <= '0';
 					INT <= '0';
 					RTI <= '0';
 				WHEN "0111000" | "0111001" => --addi|subi
@@ -177,7 +195,7 @@ BEGIN
 					aluImm <= '1';
 					writeEnable <= '1';
 					alu_enable <= '1';
-					oneoperand <='0';
+					oneoperand <= '0';
 					INT <= '0';
 					RTI <= '0';
 				WHEN "1001000" => --push
@@ -193,7 +211,7 @@ BEGIN
 					aluImm <= '0';
 					writeEnable <= '0';
 					alu_enable <= '0';
-					oneoperand <='1';
+					oneoperand <= '1';
 					INT <= '0';
 					RTI <= '0';
 				WHEN "1001001" => --pop
@@ -209,7 +227,7 @@ BEGIN
 					aluImm <= '0';
 					writeEnable <= '1';
 					alu_enable <= '0';
-					oneoperand <='1';
+					oneoperand <= '1';
 					INT <= '0';
 					RTI <= '0';
 				WHEN "1010000" => --Load immediate
@@ -225,7 +243,7 @@ BEGIN
 					aluImm <= '1';
 					writeEnable <= '1';
 					alu_enable <= '0';
-					oneoperand <='0';
+					oneoperand <= '0';
 					INT <= '0';
 					RTI <= '0';
 				WHEN "1011000" => --Load
@@ -241,7 +259,7 @@ BEGIN
 					aluImm <= '0';
 					writeEnable <= '1';
 					alu_enable <= '0';
-					oneoperand <='0';
+					oneoperand <= '0';
 					INT <= '0';
 					RTI <= '0';
 				WHEN "1011001" => --store
@@ -257,7 +275,7 @@ BEGIN
 					aluImm <= '0';
 					writeEnable <= '0';
 					alu_enable <= '0';
-					oneoperand <='0';
+					oneoperand <= '0';
 					INT <= '0';
 					RTI <= '0';
 				WHEN "1101000" => --jz
@@ -273,7 +291,7 @@ BEGIN
 					aluImm <= '0';
 					writeEnable <= '0';
 					alu_enable <= '0';
-					oneoperand <='1';
+					oneoperand <= '1';
 					INT <= '0';
 					RTI <= '0';
 				WHEN "1101001" => --jump
@@ -289,7 +307,7 @@ BEGIN
 					aluImm <= '0';
 					writeEnable <= '0';
 					alu_enable <= '0';
-					oneoperand <='1';
+					oneoperand <= '1';
 					INT <= '0';
 					RTI <= '0';
 				WHEN "1101010" => --call
@@ -305,7 +323,7 @@ BEGIN
 					aluImm <= '0';
 					writeEnable <= '0';
 					alu_enable <= '0';
-					oneoperand <='1';
+					oneoperand <= '1';
 					INT <= '0';
 					RTI <= '0';
 				WHEN "1100000" => --return
@@ -321,7 +339,7 @@ BEGIN
 					aluImm <= '0';
 					writeEnable <= '0';
 					alu_enable <= '0';
-					oneoperand <='0';
+					oneoperand <= '0';
 					INT <= '0';
 					RTI <= '0';
 				WHEN "0000010" => -- INT
@@ -337,7 +355,7 @@ BEGIN
 					aluImm <= '0';
 					writeEnable <= '0';
 					alu_enable <= '0';
-					oneoperand <='0';
+					oneoperand <= '0';
 					INT <= '1';
 					RTI <= '0';
 				WHEN "1100001" => -- RTI
@@ -353,7 +371,7 @@ BEGIN
 					aluImm <= '0';
 					writeEnable <= '0';
 					alu_enable <= '0';
-					oneoperand <='0';
+					oneoperand <= '0';
 					INT <= '0';
 					RTI <= '1';
 				WHEN OTHERS =>
@@ -369,7 +387,7 @@ BEGIN
 					aluImm <= '0';
 					writeEnable <= '0';
 					alu_enable <= '0';
-					oneoperand <='0';
+					oneoperand <= '0';
 					INT <= '0';
 					RTI <= '0';
 			END CASE;
