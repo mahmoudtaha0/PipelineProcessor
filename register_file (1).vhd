@@ -8,7 +8,7 @@ ENTITY register_file IS
         write_addr1, write_addr2 : IN STD_LOGIC_VECTOR(2 DOWNTO 0);
         read_addr_1, read_addr_2 : IN STD_LOGIC_VECTOR(2 DOWNTO 0);
         write_data1, write_data2 : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
-        read_data_1, read_data_2 : OUT STD_LOGIC_VECTOR(31 DOWNTO 0)
+        read_data_1, read_data_2 : OUT STD_LOGIC_VECTOR(31 DOWNTO 0);
     );
 END register_file;
 

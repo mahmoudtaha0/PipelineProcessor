@@ -144,7 +144,7 @@ ARCHITECTURE my_model OF Processor IS
 	COMPONENT Controller IS
 		PORT (
 			opcode : IN STD_LOGIC_VECTOR(6 DOWNTO 0);
-			reset_input : IN STD_LOGIC;
+			reset_input, ZF : IN STD_LOGIC;
 			jump, jumpZ, rst, immEnable, immFlush, memoryWrite, memoryRead, returnEnable, callEnable, aluImm, writeEnable, alu_enable, oneoperand : OUT STD_LOGIC;
 			opcode_to_alu : OUT STD_LOGIC_VECTOR(6 DOWNTO 0);
 			INT, RTI : OUT STD_LOGIC
@@ -177,6 +177,14 @@ ARCHITECTURE my_model OF Processor IS
 			A, B : OUT STD_LOGIC_VECTOR(15 DOWNTO 0)
 		);
 	END COMPONENT;
+	COMPONENT mux4 is
+		PORT (
+			in0, in1, in2, in3 : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
+			sel : IN STD_LOGIC_VECTOR(1 DOWNTO 0);
+			out1 : OUT STD_LOGIC_VECTOR(31 DOWNTO 0)
+		);
+	END COMPONENT;
+
 	SIGNAL c_pc_instCache : STD_LOGIC_VECTOR (31 DOWNTO 0);
 	SIGNAL Instuction_instructioncache_FDBuffer, Demux_output_FDBuffer, Demux_output_DEBuffer : STD_LOGIC_VECTOR (15 DOWNTO 0);
 	SIGNAL immidiate_enable_controller : STD_LOGIC := '0';
@@ -207,12 +215,13 @@ ARCHITECTURE my_model OF Processor IS
 	SIGNAL reg_file_mux_out : STD_LOGIC_VECTOR(2 DOWNTO 0);
 	SIGNAL PC_OP : STD_LOGIC_VECTOR(31 DOWNTO 0);
 	SIGNAL PC : STD_LOGIC_VECTOR(31 DOWNTO 0);
-	SIGNAL branch_pc : STD_LOGIC;
+	SIGNAL branch_pc, jmp_pc : STD_LOGIC;
 BEGIN
-	branch_pc <= INT_Controller OR RTI_Controller OR returnEnable_controller OR jump_controller OR jumpZ_controller;
+	branch_pc <= INT_Controller OR RTI_Controller OR returnEnable_controller;
+	jump_pc <= jump_controller OR jumpZ_controller OR callEnable_controller;
 
-	U0 : mux2 PORT MAP(
-		in0 => c_pc_instCache, in1 => PC_OP, sel => branch_pc,
+	U0 : mux4 PORT MAP(
+		in0 => c_pc_instCache, in1 => PC_OP, in2 => ReadData1_RegFile_DEBuffer, in3 => (others => '0'), sel => jump_pc&branch_pc,
 		out1 => PC);
 
 	U1 : ProgramCounter PORT MAP(clk => clk, rst => reset, en => enable, c => PC);
@@ -236,7 +245,7 @@ BEGIN
 		immFlush => immFlush_controller, memoryWrite => memoryWrite_controller,
 		memoryRead => memoryRead_controller, returnEnable => returnEnable_controller,
 		callEnable => callEnable_controller, aluImm => aluImm_controller, writeEnable => writeEnable_controller,
-		alu_enable => alu_enable_controller, opcode_to_alu => op_code_controller_alu, oneoperand => reg_file_mux_sel, INT => INT_controller, RTI => RTI_controller);
+		alu_enable => alu_enable_controller, opcode_to_alu => op_code_controller_alu, oneoperand => reg_file_mux_sel, INT => INT_controller, RTI => RTI_controller, ZF => CCR_signal(0));
 
 	U6 : mux2_3bits PORT MAP(
 		in0 => data_FDBuffer_regFile(8 DOWNTO 6), in1 => data_FDBuffer_regFile(2 DOWNTO 0), sel => reg_file_mux_sel,

@@ -6,6 +6,7 @@ ENTITY Controller IS
 	PORT (
 		opcode : IN STD_LOGIC_VECTOR(6 DOWNTO 0);
 		reset_input : IN STD_LOGIC;
+		ZF : IN STD_LOGIC;
 		jump, jumpZ, rst, immEnable, immFlush, memoryWrite, memoryRead, returnEnable, callEnable, aluImm, writeEnable, alu_enable,oneoperand : OUT STD_LOGIC;
 		opcode_to_alu : OUT STD_LOGIC_VECTOR(6 DOWNTO 0);
 		INT, RTI : OUT STD_LOGIC
@@ -262,7 +263,7 @@ BEGIN
 				WHEN "1101000" => --jz
 					rst <= '0';
 					jump <= '0';
-					jumpZ <= '1';
+					jumpZ <= ZF;
 					immEnable <= '0';
 					immFlush <= '0';
 					memoryWrite <= '0';

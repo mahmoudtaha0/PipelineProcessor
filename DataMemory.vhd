@@ -47,7 +47,7 @@ BEGIN
             PC_out <= (OTHERS => '0');
         ELSIF rising_edge(clk) THEN
             IF memoryWrite = '1' AND ram_protected(to_integer(unsigned(Add))) = '0' THEN
-                ram(to_integer(unsigned(Add))) <= writeData(31 DOWNTO 16); --------- e7na msh fahmen hena hanktb ezay 32 bits fel memory ely heya 16 bit keda hattktb 3ala mkanen ??
+                ram(to_integer(unsigned(Add))) <= writeData(31 DOWNTO 16); 
                 ram(to_integer(unsigned(Add) + 1)) <= writeData(15 DOWNTO 0);
             ELSIF memoryWrite = '1' AND ram_protected(to_integer(unsigned(Add))) = '1' THEN
                 violation_signal <= '1';
