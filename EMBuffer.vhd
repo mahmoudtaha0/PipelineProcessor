@@ -23,7 +23,9 @@ ENTITY EMBuffer IS
 		INT, RTI : IN STD_LOGIC;
 		INT_out, RTI_out : OUT STD_LOGIC;
 		CCR : IN STD_LOGIC_VECTOR(3 DOWNTO 0);
-		CCR_out : OUT STD_LOGIC_VECTOR(3 DOWNTO 0)
+		CCR_out : OUT STD_LOGIC_VECTOR(3 DOWNTO 0);
+		IN_PORT : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
+		IN_PORT_EM : OUT STD_LOGIC_VECTOR(31 DOWNTO 0)
 	);
 END EMBuffer;
 
@@ -46,6 +48,7 @@ BEGIN
 			--zeroflag_out<= '0';
 			writeRegAddr_out <= (OTHERS => '0');
 			INT_out <= '0';
+			IN_PORT_EM <= (OTHERS => '0');
 		ELSE
 			IF rising_edge(clk) THEN
 				write_enable_out <= write_enable;
@@ -62,6 +65,7 @@ BEGIN
 				--zeroflag_out<= zeroflag;
 				writeRegAddr_out <= writeRegAddr;
 				INT_out <= INT;
+				IN_PORT_EM <= IN_PORT;
 			END IF;
 		END IF;
 	END PROCESS;

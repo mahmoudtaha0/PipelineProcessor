@@ -15,7 +15,11 @@ ENTITY MWBuffer IS
 		imm_enable_out : OUT STD_LOGIC;
 		readdata_out, alu_result_out : OUT STD_LOGIC_VECTOR(31 DOWNTO 0);
 		imm_value_out : OUT STD_LOGIC_VECTOR (31 DOWNTO 0);
-		writeRegAddr_out : OUT STD_LOGIC_VECTOR (2 DOWNTO 0)
+		writeRegAddr_out : OUT STD_LOGIC_VECTOR (2 DOWNTO 0);
+		IN_PORT : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
+		IN_PORT_MW : OUT STD_LOGIC_VECTOR(31 DOWNTO 0);
+		ReadData1 : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
+		ReadData1_MW : OUT STD_LOGIC_VECTOR(31 DOWNTO 0)
 	);
 END MWBuffer;
 
@@ -30,6 +34,8 @@ BEGIN
 			writeRegAddr_out <= (OTHERS => '0');
 			imm_value_out <= (OTHERS => '0');
 			imm_enable_out <= '0';
+			IN_PORT_MW <= (OTHERS => '0');
+			ReadData1_MW <= (OTHERS => '0');
 		ELSE
 			IF rising_edge(clk) THEN
 				write_enable_out <= write_enable;
@@ -38,6 +44,8 @@ BEGIN
 				writeRegAddr_out <= writeRegAddr;
 				imm_value_out <= imm_value;
 				imm_enable_out <= imm_enable;
+				IN_PORT_MW <= IN_PORT;
+				ReadData1_MW <= ReadData1;
 			END IF;
 		END IF;
 	END PROCESS;

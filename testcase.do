@@ -18,8 +18,6 @@ mem load -filltype value -filldata 0100000000101000 -fillradix symbolic /process
 mem load -filltype value -filldata 0110011100011111 -fillradix symbolic /processor/U2/ram(16)
 mem load -filltype value -filldata 0001000000000110 -fillradix symbolic /processor/U2/ram(17)
 mem load -filltype value -filldata 0001011000000000 -fillradix symbolic /processor/U2/ram(18)
-
-
 force -freeze sim:/processor/reset 1 0
 run
 

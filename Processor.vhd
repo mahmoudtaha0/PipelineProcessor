@@ -33,7 +33,9 @@ ARCHITECTURE my_model OF Processor IS
 			Given_instruction : IN STD_LOGIC_VECTOR(15 DOWNTO 0);
 			Op_code : OUT STD_LOGIC_VECTOR(6 DOWNTO 0);
 			To_RegFile_data : OUT STD_LOGIC_VECTOR(8 DOWNTO 0);
-			To_RegFile_op_Code : OUT STD_LOGIC_VECTOR(1 DOWNTO 0) --na2es el mux el hay7added el operands
+			To_RegFile_op_Code : OUT STD_LOGIC_VECTOR(1 DOWNTO 0);
+			IN_PORT : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
+			IN_PORT_FD : OUT STD_LOGIC_VECTOR(31 DOWNTO 0)
 		);
 	END COMPONENT;
 	COMPONENT register_file IS
@@ -63,7 +65,9 @@ ARCHITECTURE my_model OF Processor IS
 			--pc_out: out std_logic_vector (31 downto 0)
 			--return_enable_out,call_enable_out : out std_logic;
 			INT, RTI : IN STD_LOGIC;
-			INT_out, RTI_out : OUT STD_LOGIC
+			INT_out, RTI_out : OUT STD_LOGIC;
+			IN_PORT : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
+			IN_PORT_DE : OUT STD_LOGIC_VECTOR(31 DOWNTO 0)
 		);
 	END COMPONENT;
 
@@ -112,7 +116,9 @@ ARCHITECTURE my_model OF Processor IS
 			INT, RTI : IN STD_LOGIC;
 			INT_out, RTI_out : OUT STD_LOGIC;
 			CCR : IN STD_LOGIC_VECTOR(3 DOWNTO 0);
-			CCR_out : OUT STD_LOGIC_VECTOR(3 DOWNTO 0)
+			CCR_out : OUT STD_LOGIC_VECTOR(3 DOWNTO 0);
+			IN_PORT : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
+			IN_PORT_EM : OUT STD_LOGIC_VECTOR(31 DOWNTO 0)
 		);
 	END COMPONENT;
 	COMPONENT DataMemory IS
@@ -138,7 +144,11 @@ ARCHITECTURE my_model OF Processor IS
 			imm_enable_out : OUT STD_LOGIC;
 			readdata_out, alu_result_out : OUT STD_LOGIC_VECTOR(31 DOWNTO 0);
 			imm_value_out : OUT STD_LOGIC_VECTOR (31 DOWNTO 0);
-			writeRegAddr_out : OUT STD_LOGIC_VECTOR (2 DOWNTO 0)
+			writeRegAddr_out : OUT STD_LOGIC_VECTOR (2 DOWNTO 0);
+			IN_PORT : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
+			IN_PORT_MW : OUT STD_LOGIC_VECTOR(31 DOWNTO 0);
+			ReadData1 : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
+			ReadData1_MW : OUT STD_LOGIC_VECTOR(31 DOWNTO 0)
 		);
 	END COMPONENT;
 	COMPONENT Controller IS
@@ -177,7 +187,7 @@ ARCHITECTURE my_model OF Processor IS
 			A, B : OUT STD_LOGIC_VECTOR(15 DOWNTO 0)
 		);
 	END COMPONENT;
-	COMPONENT mux4 is
+	COMPONENT mux4 IS
 		PORT (
 			in0, in1, in2, in3 : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
 			sel : IN STD_LOGIC_VECTOR(1 DOWNTO 0);
@@ -204,7 +214,7 @@ ARCHITECTURE my_model OF Processor IS
 	SIGNAL CCR_EM, CCR_DM : STD_LOGIC_VECTOR(3 DOWNTO 0);
 	SIGNAL CCR_OP : STD_LOGIC_VECTOR(3 DOWNTO 0);
 	SIGNAL Write_enable_EMBuffer_MWBuffer, Memory_Read_EMBuffer_DataMemory, Memory_write_EMBuffer_DataMemory : STD_LOGIC;
-	SIGNAL AluResult_EMBuffer_DataMemory, ReadData2_EMBuffer_DataMemory, ReadData_DataMemory_MWBuffer : STD_LOGIC_VECTOR (31 DOWNTO 0);
+	SIGNAL AluResult_EMBuffer_DataMemory, ReadData1_EMBuffer_DataMemory, ReadData_DataMemory_MWBuffer, ReadData1_EM_Buffer : STD_LOGIC_VECTOR (31 DOWNTO 0);
 	SIGNAL ImmValue_EMBuffer, ImmValue_MWBuffer : STD_LOGIC_VECTOR (31 DOWNTO 0);
 	SIGNAL Write_Enable_MWBuffer_Mux : STD_LOGIC := '0';
 	SIGNAL ReadData_MWBuffer_Mux, AluResult_MWBuffer_Mux : STD_LOGIC_VECTOR (31 DOWNTO 0);
@@ -215,13 +225,21 @@ ARCHITECTURE my_model OF Processor IS
 	SIGNAL reg_file_mux_out : STD_LOGIC_VECTOR(2 DOWNTO 0);
 	SIGNAL PC_OP : STD_LOGIC_VECTOR(31 DOWNTO 0);
 	SIGNAL PC : STD_LOGIC_VECTOR(31 DOWNTO 0);
-	SIGNAL branch_pc, jmp_pc : STD_LOGIC;
+	SIGNAL branch_pc, jump_pc : STD_LOGIC;
+	SIGNAL pc_sel : STD_LOGIC_VECTOR(1 DOWNTO 0);
+	SIGNAL mem_addr_sel : STD_LOGIC;
+	SIGNAL FD_IP, DE_IP, EM_IP, MW_IP : STD_LOGIC_VECTOR(31 DOWNTO 0);
+	SIGNAL write_data_regfile : STD_LOGIC_VECTOR(31 DOWNTO 0);
+	SIGNAL IN_PORT_EN : STD_LOGIC;
+	SIGNAL ReadData1_MW_Buffer : STD_LOGIC_VECTOR(31 DOWNTO 0);
 BEGIN
 	branch_pc <= INT_Controller OR RTI_Controller OR returnEnable_controller;
 	jump_pc <= jump_controller OR jumpZ_controller OR callEnable_controller;
+	pc_sel <= jump_pc & branch_pc;
+	mem_addr_sel <= immEnable_controller AND (memoryWrite_controller OR memoryRead_controller);
 
 	U0 : mux4 PORT MAP(
-		in0 => c_pc_instCache, in1 => PC_OP, in2 => ReadData1_RegFile_DEBuffer, in3 => (others => '0'), sel => jump_pc&branch_pc,
+		in0 => c_pc_instCache, in1 => PC_OP, in2 => ReadData1_RegFile_DEBuffer, in3 => (OTHERS => '0'), sel => pc_sel,
 		out1 => PC);
 
 	U1 : ProgramCounter PORT MAP(clk => clk, rst => reset, en => enable, c => PC);
@@ -237,7 +255,7 @@ BEGIN
 	U4 : FetchDecodeBuffer1 PORT MAP(
 		clk => clk, FD_reset => reset, FD_enable => enable, Given_instruction => Demux_output_FDBuffer,
 		Op_code => op_code_FDBuffer_controller, To_RegFile_data => data_FDBuffer_regFile,
-		To_RegFile_op_Code => op_code_FDBuffer_RegFile);
+		To_RegFile_op_Code => op_code_FDBuffer_RegFile, IN_PORT => inputport, IN_PORT_FD => FD_IP);
 
 	U5 : Controller PORT MAP(
 		opcode => op_code_FDBuffer_controller, reset_input => reset, jump => jump_controller,
@@ -263,7 +281,8 @@ BEGIN
 		memoryread => memoryRead_controller, imm_value => Demux_output_DEBuffer, readdata1_out => ReadData1Out_DEBuffer_Alu,
 		readdata2_out => ReadData2Out_DEBuffer_Alu, imm_value_out => ImmValue_DEBuffer_Demux, memoryread_out => MemoryRead_DEBuffer_EMBuffer,
 		memorywrite_out => MemoryWrite_DEBuffer_EMBuffer, write_enable_out => Write_Enable_DEBuffer_EMBuffer, writeRegAddr => data_FDBuffer_regFile(2 DOWNTO 0),
-		imm_enable_out => Imm_Enable_DEBUffer_Mux, alu_enable_out => Alu_Enable_DEBuffer_Alu, writeRegAddr_out => write_reg_out_DEBuffer_EMBuffer, INT => INT_Controller, INT_out => DE_INT, RTI => RTI_Controller, RTI_out => DE_RTI);
+		imm_enable_out => Imm_Enable_DEBUffer_Mux, alu_enable_out => Alu_Enable_DEBuffer_Alu, writeRegAddr_out => write_reg_out_DEBuffer_EMBuffer, INT => INT_Controller, INT_out => DE_INT, RTI => RTI_Controller, RTI_out => DE_RTI,
+		IN_PORT => FD_IP, IN_PORT_DE => DE_IP);
 
 	U9 : Demux2 PORT MAP(F => ImmValue_DEBuffer_Demux, Sel => ALUImm_DEBuffer_Demux, A => ImmValue_Demux_Alu, B => ImmValue_Demux_EMBuffer);
 
@@ -276,15 +295,16 @@ BEGIN
 
 	U12 : EMBuffer PORT MAP(
 		clk => clk, write_enable => Write_Enable_DEBuffer_EMBuffer, reset => rst_controller, memoryread => MemoryRead_DEBuffer_EMBuffer,
-		memorywrite => MemoryWrite_DEBuffer_EMBuffer, alu_result => Alu_Output_EMBuffer, datain => ReadData2Out_DEBuffer_Alu,
+		memorywrite => MemoryWrite_DEBuffer_EMBuffer, alu_result => Alu_Output_EMBuffer, datain => ReadData1Out_DEBuffer_Alu,
 		imm_value => ImmValue_Demux_EMBuffer, imm_enable => Imm_Enable_DEBUffer_Mux, write_enable_out => Write_enable_EMBuffer_MWBuffer,
 		memoryread_out => Memory_Read_EMBuffer_DataMemory, memorywrite_out => Memory_write_EMBuffer_DataMemory, writeRegAddr_out => write_reg_out_EMBuffer_MWBuffer,
-		alu_result_out => AluResult_EMBuffer_DataMemory, imm_value_out => ImmValue_EMBuffer, dataout => ReadData2_EMBuffer_DataMemory,
-		writeRegAddr => write_reg_out_DEBuffer_EMBuffer, imm_enable_out => Imm_Enable_EMBuffer, INT => DE_INT, INT_out => EM_INT, RTI => DE_RTI, RTI_out => EM_RTI, CCR => CCR_signal, CCR_out => CCR_EM);
+		alu_result_out => AluResult_EMBuffer_DataMemory, imm_value_out => ImmValue_EMBuffer, dataout => ReadData1_EM_Buffer,
+		writeRegAddr => write_reg_out_DEBuffer_EMBuffer, imm_enable_out => Imm_Enable_EMBuffer, INT => DE_INT, INT_out => EM_INT, RTI => DE_RTI, RTI_out => EM_RTI, CCR => CCR_signal, CCR_out => CCR_EM,
+		IN_PORT => DE_IP, IN_PORT_EM => EM_IP);
 
 	U13 : DataMemory PORT MAP(
 		rst => rst_controller, memoryWrite => Memory_write_EMBuffer_DataMemory, memoryRead => Memory_Read_EMBuffer_DataMemory,
-		clk => clk, Add => AluResult_EMBuffer_DataMemory, writeData => ReadData2_EMBuffer_DataMemory,
+		clk => clk, Add => AluResult_EMBuffer_DataMemory, writeData => ReadData1_EM_Buffer,
 		readData => ReadData_DataMemory_MWBuffer, INT => EM_INT, RTI => EM_RTI, CCR => CCR_EM, CCR_out => CCR_DM, PC_out => PC_OP);
 
 	U14 : CCR PORT MAP(CCR_IN => CCR_DM, CCR_OUT => CCR_OP);
@@ -294,9 +314,13 @@ BEGIN
 		alu_result => AluResult_EMBuffer_DataMemory, write_enable_out => Write_Enable_MWBuffer_Mux,
 		readdata_out => ReadData_MWBuffer_Mux, alu_result_out => AluResult_MWBuffer_Mux, writeRegAddr => write_reg_out_EMBuffer_MWBuffer,
 		writeRegAddr_out => writeAdd_WBBuffer_RefFile, imm_value => ImmValue_EMBuffer, imm_value_out => ImmValue_MWBuffer,
-		imm_enable => Imm_Enable_EMBuffer, imm_enable_out => Imm_Enable_MWBuffer);
+		imm_enable => Imm_Enable_EMBuffer, imm_enable_out => Imm_Enable_MWBuffer, IN_PORT => EM_IP, IN_PORT_MW => MW_IP, ReadData1 => ReadData1_EM_Buffer, ReadData1_MW => ReadData1_MW_Buffer);
+
+	outputport <= ReadData1_MW_Buffer;
 
 	U16 : mux2 PORT MAP(in0 => AluResult_MWBuffer_Mux, in1 => ImmValue_MWBuffer, sel => Imm_Enable_MWBuffer, out1 => Alu_Imm_mux);
 
 	U17 : mux2 PORT MAP(in0 => ReadData_MWBuffer_Mux, in1 => Alu_Imm_mux, sel => Write_Enable_MWBuffer_Mux, out1 => writedata_WBBuffer_RefFile);
+	U18 : mux2 PORT MAP(in0 => writedata_WBBuffer_RefFile, in1 => MW_IP, sel => IN_PORT_EN, out1 => write_data_regfile);
+	U19 : mux2 PORT MAP(in0 => Alu_Output_EMBuffer, in1 => ImmValue_EMBuffer, sel => mem_addr_sel);
 END ARCHITECTURE;

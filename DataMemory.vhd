@@ -4,7 +4,7 @@ USE IEEE.numeric_std.ALL;
 
 ENTITY DataMemory IS
     PORT (
-        rst, memoryWrite, memoryRead, clk, protect_enable, free_enable, push_en, pop_en, call_en : IN STD_LOGIC;
+        rst, memoryWrite, memoryRead, clk, protect_enable, free_enable, push_en, pop_en, call_en, ret_en : IN STD_LOGIC;
         writeData, Add : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
         PC : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
         readData, PC_out : OUT STD_LOGIC_VECTOR(31 DOWNTO 0);
@@ -47,7 +47,7 @@ BEGIN
             PC_out <= (OTHERS => '0');
         ELSIF rising_edge(clk) THEN
             IF memoryWrite = '1' AND ram_protected(to_integer(unsigned(Add))) = '0' THEN
-                ram(to_integer(unsigned(Add))) <= writeData(31 DOWNTO 16); 
+                ram(to_integer(unsigned(Add))) <= writeData(31 DOWNTO 16);  -- WRITE
                 ram(to_integer(unsigned(Add) + 1)) <= writeData(15 DOWNTO 0);
             ELSIF memoryWrite = '1' AND ram_protected(to_integer(unsigned(Add))) = '1' THEN
                 violation_signal <= '1';
@@ -66,6 +66,7 @@ BEGIN
                 st_in <= std_logic_vector(unsigned(st_out) - 2);
                 -- Fadel PC <- R[Rdst]
             ELSIF INT = '1' THEN
+            -- INT
             -- SAVE PC
             ram(to_integer(unsigned(st_out))) <= PC_signal(31 DOWNTO 16);
             ram(to_integer(unsigned(st_out) - 1)) <= PC_signal(15 DOWNTO 0);
@@ -80,16 +81,18 @@ BEGIN
             st_in <= STD_LOGIC_VECTOR(unsigned(st_out) - 2);
             PC_out <= ram(3) & ram(2);
 
-            ELSIF RTI = '1' THEN
-            -- RESTORE CCR
+            ELSIF RTI = '1' OR ret_en = '1' THEN
+            -- RTI OR RET
             st_in <= STD_LOGIC_VECTOR(unsigned(st_out) + 2);
-            CCR_out <= ram(to_integer(unsigned(st_out )) - 1)(3 DOWNTO 0);
             -- RESTORE PC
             st_in <= STD_LOGIC_VECTOR(unsigned(st_out) + 2);
             PC_out <= ram(to_integer(unsigned(st_out))) & ram(to_integer(unsigned(st_out)) - 1);
-            
             END IF;
-        ELSIF falling_edge(clk) THEN
+            IF RTI = '1' THEN
+            -- RESTORE CCR
+            CCR_out <= ram(to_integer(unsigned(st_out )) - 1)(3 DOWNTO 0);
+            END IF;
+            ELSIF falling_edge(clk) THEN
             violation_signal <= '0';
         END IF;
     END PROCESS;
@@ -97,14 +100,14 @@ BEGIN
     PROCESS (memoryRead, Add, clk)
     BEGIN
         IF falling_edge(clk) THEN
-            IF memoryRead = '1' AND push_en = '0' THEN
+            IF memoryRead = '1' AND push_en = '0' THEN         -- READ
                 readData(31 DOWNTO 16) <= ram(to_integer(unsigned(Add)));
                 readData(15 DOWNTO 0) <= ram(to_integer(unsigned(Add) + 1));
-            ELSIF memoryRead = '1' AND pop_en = '1' THEN
+            ELSIF memoryRead = '1' AND pop_en = '1' THEN           -- POP
                 readData(31 DOWNTO 16) <= ram(to_integer(unsigned(st_out)));
                 readData(15 DOWNTO 0) <= ram(to_integer(unsigned(st_out) + 1));
                 st_in <= STD_LOGIC_VECTOR(unsigned(st_out) + 2);
-            ELSIF memoryRead = '1' AND call_en = '1' THEN
+            ELSIF memoryRead = '1' AND call_en = '1' THEN          -- CALL
                 PC_out(31 DOWNTO 16) <= ram(to_integer(unsigned(Add)));
                 PC_out(15 DOWNTO 0) <= ram(to_integer(unsigned(Add) + 1));
             ELSE

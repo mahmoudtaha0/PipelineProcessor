@@ -18,7 +18,9 @@ ENTITY DEBuffer IS
         writeRegAddr_out : OUT STD_LOGIC_VECTOR (2 DOWNTO 0);
         opcode_out : OUT STD_LOGIC_VECTOR (6 DOWNTO 0);
         INT, RTI : IN STD_LOGIC;
-        INT_out, RTI_out : OUT STD_LOGIC
+        INT_out, RTI_out : OUT STD_LOGIC;
+        IN_PORT : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
+        IN_PORT_DE : OUT STD_LOGIC_VECTOR(31 DOWNTO 0)
         --pc_out: out std_logic_vector (31 downto 0)
         --return_enable_out,call_enable_out : out std_logic;
     );
@@ -44,6 +46,7 @@ BEGIN
             writeRegAddr_out <= (OTHERS => '0');
             opcode_out <= (OTHERS => '0');
             INT_out <= '0';
+            IN_PORT_DE <= (OTHERS => '0');
         ELSE
             IF rising_edge(clk) THEN
                 readdata1_out <= readdata1;
@@ -60,6 +63,8 @@ BEGIN
                 --pc_out <= pc;
                 opcode_out <= opcode;
                 INT_out <= INT;
+
+                IN_PORT_DE <= IN_PORT;
 
                 IF imm_value(15) = '0' THEN
                     imm_value_out <= (31 DOWNTO 16 => '0') & imm_value;
