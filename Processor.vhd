@@ -229,7 +229,7 @@ ARCHITECTURE my_model OF Processor IS
 	SIGNAL PC_OP : STD_LOGIC_VECTOR(31 DOWNTO 0);
 	SIGNAL PC : STD_LOGIC_VECTOR(31 DOWNTO 0);
 	SIGNAL branch_pc, jump_pc : STD_LOGIC;
-	SIGNAL pc_sel : STD_LOGIC_VECTOR(1 DOWNTO 0);
+	SIGNAL pc_sel : STD_LOGIC_VECTOR(1 DOWNTO 0) := "00";
 	SIGNAL mem_addr_sel : STD_LOGIC;
 	SIGNAL FD_IP, DE_IP, EM_IP, MW_IP : STD_LOGIC_VECTOR(31 DOWNTO 0);
 	SIGNAL write_data1_regfile : STD_LOGIC_VECTOR(31 DOWNTO 0);
@@ -243,14 +243,16 @@ BEGIN
 	pc_sel <= jump_pc & branch_pc;
 	mem_addr_sel <= immEnable_controller AND (memoryWrite_controller OR memoryRead_controller);
 
-	U0 : mux4 PORT MAP(
+	U0 : ProgramCounter PORT MAP(clk => clk, rst => reset, en => enable, c => c_pc_instCache);
+
+
+	U1 : mux4 PORT MAP(
 		in0 => c_pc_instCache, in1 => PC_OP, in2 => ReadData1_RegFile_DEBuffer, in3 => (OTHERS => '0'), sel => pc_sel,
 		out1 => PC);
 
-	U1 : ProgramCounter PORT MAP(clk => clk, rst => reset, en => enable, c => PC);
 
 	U2 : InstructionCachee PORT MAP(
-		reset => reset, clk => clk, enable => enable, read_address => c_pc_instCache (15 DOWNTO 0),
+		reset => reset, clk => clk, enable => enable, read_address => PC (15 DOWNTO 0),
 		dataout => Instuction_instructioncache_FDBuffer);
 
 	U3 : Demux16Bit PORT MAP(
