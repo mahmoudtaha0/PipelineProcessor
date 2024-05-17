@@ -9,15 +9,15 @@ ENTITY ForwardingUnit IS
         ALU_Result : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
         MEM_Loaded : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
         Forwarded_data : OUT STD_LOGIC_VECTOR(31 DOWNTO 0)
-       
+
     );
 END ForwardingUnit;
 
 ARCHITECTURE behavior OF ForwardingUnit IS
 BEGIN
-	Forwarded_data <= ALU_Result when Forward_Sig = "01" else
-        MEM_Loaded when Forward_Sig = "11" else
-        (others => '0');
-			  
--- Begin after resolving Imm/Operand mux selector from control unit issue 
+    Forwarded_data <= ALU_Result WHEN Forward_Sig = "01" ELSE
+        MEM_Loaded WHEN Forward_Sig = "11" ELSE
+        (OTHERS => '0');
+
+    -- Begin after resolving Imm/Operand mux selector from control unit issue 
 END ARCHITECTURE;

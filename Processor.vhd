@@ -15,6 +15,7 @@ END Processor;
 ARCHITECTURE my_model OF Processor IS
 	COMPONENT ProgramCounter IS
 		PORT (
+			PC_in : IN STD_LOGIC_VECTOR (31 DOWNTO 0);
 			clk, rst, en : IN STD_LOGIC;
 			c : OUT STD_LOGIC_VECTOR (31 DOWNTO 0)
 		);
@@ -62,12 +63,13 @@ ARCHITECTURE my_model OF Processor IS
 			memoryread_out, memorywrite_out, write_enable_out, alu_enable_out, aluimm_out, imm_enable_out : OUT STD_LOGIC;
 			writeRegAddr_out : OUT STD_LOGIC_VECTOR (2 DOWNTO 0);
 			opcode_out : OUT STD_LOGIC_VECTOR (6 DOWNTO 0);
-			--pc_out: out std_logic_vector (31 downto 0)
-			--return_enable_out,call_enable_out : out std_logic;
 			INT, RTI : IN STD_LOGIC;
+			Stall : IN STD_LOGIC;
 			INT_out, RTI_out : OUT STD_LOGIC;
 			IN_PORT : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
 			IN_PORT_DE : OUT STD_LOGIC_VECTOR(31 DOWNTO 0)
+			--pc_out: out std_logic_vector (31 downto 0)
+			--return_enable_out,call_enable_out : out std_logic;
 		);
 	END COMPONENT;
 
@@ -199,7 +201,7 @@ ARCHITECTURE my_model OF Processor IS
 		);
 	END COMPONENT;
 
-	SIGNAL c_pc_instCache : STD_LOGIC_VECTOR (31 DOWNTO 0);
+	SIGNAL c_pc_instCache : STD_LOGIC_VECTOR (31 DOWNTO 0) := (OTHERS => '0');
 	SIGNAL Instuction_instructioncache_FDBuffer, Demux_output_FDBuffer, Demux_output_DEBuffer : STD_LOGIC_VECTOR (15 DOWNTO 0);
 	SIGNAL immidiate_enable_controller : STD_LOGIC := '0';
 	SIGNAL op_code_FDBuffer_controller, op_code_controller_alu : STD_LOGIC_VECTOR (6 DOWNTO 0);
@@ -239,22 +241,21 @@ ARCHITECTURE my_model OF Processor IS
 	SIGNAL ReadData1_MW_Buffer, ReadData2_EM_Buffer : STD_LOGIC_VECTOR(31 DOWNTO 0);
 	SIGNAL SWAP_EN : STD_LOGIC;
 	SIGNAL stack_pointer : STD_LOGIC_VECTOR(31 DOWNTO 0);
+	SIGNAL stall_DE : STD_LOGIC := '0';
 BEGIN
 	branch_pc <= INT_Controller OR RTI_Controller OR returnEnable_controller;
 	jump_pc <= jump_controller OR jumpZ_controller OR callEnable_controller;
 	pc_sel <= jump_pc & branch_pc;
 	mem_addr_sel <= immEnable_controller AND (memoryWrite_controller OR memoryRead_controller);
 
-	U0 : ProgramCounter PORT MAP(clk => clk, rst => reset, en => enable, c => c_pc_instCache);
-
-
-	U1 : mux4 PORT MAP(
+	U0 : mux4 PORT MAP(
 		in0 => c_pc_instCache, in1 => PC_OP, in2 => ReadData1_RegFile_DEBuffer, in3 => (OTHERS => '0'), sel => pc_sel,
 		out1 => PC);
 
+	U1 : ProgramCounter PORT MAP(PC_in => PC, clk => clk, rst => reset, en => enable, c => c_pc_instCache);
 
 	U2 : InstructionCachee PORT MAP(
-		reset => reset, clk => clk, enable => enable, read_address => PC (15 DOWNTO 0),
+		reset => reset, clk => clk, enable => enable, read_address => c_pc_instCache (15 DOWNTO 0),
 		dataout => Instuction_instructioncache_FDBuffer);
 
 	U3 : Demux16Bit PORT MAP(
@@ -292,7 +293,7 @@ BEGIN
 		readdata2_out => ReadData2Out_DEBuffer_Alu, imm_value_out => ImmValue_DEBuffer_Demux, memoryread_out => MemoryRead_DEBuffer_EMBuffer,
 		memorywrite_out => MemoryWrite_DEBuffer_EMBuffer, write_enable_out => Write_Enable_DEBuffer_EMBuffer, writeRegAddr => data_FDBuffer_regFile(2 DOWNTO 0),
 		imm_enable_out => Imm_Enable_DEBUffer_Mux, alu_enable_out => Alu_Enable_DEBuffer_Alu, writeRegAddr_out => write_reg_out_DEBuffer_EMBuffer, INT => INT_Controller, INT_out => DE_INT, RTI => RTI_Controller, RTI_out => DE_RTI,
-		IN_PORT => FD_IP, IN_PORT_DE => DE_IP);
+		IN_PORT => FD_IP, IN_PORT_DE => DE_IP, Stall => stall_DE);
 
 	U9 : Demux2 PORT MAP(F => ImmValue_DEBuffer_Demux, Sel => ALUImm_DEBuffer_Demux, A => ImmValue_Demux_Alu, B => ImmValue_Demux_EMBuffer);
 
