@@ -21,15 +21,14 @@ BEGIN
         IF rst = '1' THEN
             my_ram <= (OTHERS => (OTHERS => '0'));
         ELSIF rising_edge(clk) THEN
-            IF write_enable = '1' and swap_enable = '0' THEN
+            IF write_enable = '1' AND swap_enable = '0' THEN
                 my_ram(to_integer(unsigned(write_addr1))) <= write_data1;
-            elsif write_enable = '1' and swap_enable = '1' then
+            ELSIF write_enable = '1' AND swap_enable = '1' THEN
                 my_ram(to_integer(unsigned(write_addr2))) <= write_data1;
                 my_ram(to_integer(unsigned(write_addr1))) <= write_data2;
             END IF;
-            ELSE
-            read_data_1 <= my_ram(to_integer(unsigned(read_addr_1)));
-            read_data_2 <= my_ram(to_integer(unsigned(read_addr_2)));
         END IF;
     END PROCESS;
+    read_data_1 <= my_ram(to_integer(unsigned(read_addr_1)));
+    read_data_2 <= my_ram(to_integer(unsigned(read_addr_2)));
 END arch_register_file;
