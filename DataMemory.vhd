@@ -21,8 +21,8 @@ ARCHITECTURE mymodel OF DataMemory IS
     TYPE ram_type_protect IS ARRAY(0 TO 2 ** 12 - 1) OF STD_LOGIC; -- 4096 1-bit words (4 KB)
     SIGNAL ram : ram_type;
     SIGNAL ram_protected : ram_type_protect;
-    SIGNAL SP_Signal : STD_LOGIC_VECTOR(31 DOWNTO 0) := "00000000000000000000111111111111";
-    SIGNAL PC_signal : STD_LOGIC_VECTOR(31 DOWNTO 0) := (OTHERS => '0');
+    SIGNAL SP_Signal : STD_LOGIC_VECTOR(31 DOWNTO 0);
+    SIGNAL PC_signal : STD_LOGIC_VECTOR(31 DOWNTO 0);
 BEGIN
     PROCESS (clk, rst, memoryRead, Addr)
     BEGIN
@@ -31,7 +31,9 @@ BEGIN
             ram_protected <= (OTHERS => '0');
             violation_signal <= '0';
             PC_out <= (OTHERS => '0');
+            PC_signal <= (OTHERS => '0');
             SP <= "00000000000000000000111111111111";
+            SP_Signal <= "00000000000000000000111111111111";
         ELSIF rising_edge(clk) AND rst = '0' THEN
             IF memoryWrite = '1' AND ram_protected(to_integer(unsigned(Addr))) = '0' AND push_en = '0' AND call_en = '0' THEN
                 ram(to_integer(unsigned(Addr))) <= writeData(31 DOWNTO 16); -- WRITE
