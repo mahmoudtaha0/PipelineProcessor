@@ -47,6 +47,7 @@ BEGIN
             opcode_out <= (OTHERS => '0');
             INT_out <= '0';
             IN_PORT_DE <= (OTHERS => '0');
+            RTI_out <= '0';
         ELSE
             IF rising_edge(clk) THEN
                 readdata1_out <= readdata1;
@@ -63,6 +64,7 @@ BEGIN
                 --pc_out <= pc;
                 opcode_out <= opcode;
                 INT_out <= INT;
+                RTI_out <= RTI;
 
                 IN_PORT_DE <= IN_PORT;
 

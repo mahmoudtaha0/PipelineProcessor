@@ -54,24 +54,24 @@ def Assemble():
                     if operands[0] == ".ORG":                           #ignore ".org" line from checking for opcode
                         continue
                     else:
-                        if operands == ['NOP']:
+                        if operands[0] == 'NOP':
                             opcode="0000000"
                             instruction=(opcode+"000000000")
 
-                        elif operands == ['RESET']:
+                        elif operands[0] == 'RESET':
                             opcode="0000001"
                             instruction=(opcode+"000000000")
                         
-                        elif operands == ['INT']:
+                        elif operands[0] == 'INT':
                             opcode="0000010"
                             instruction=(opcode+"000000000")
                         
-                        elif operands == ['NOT']:
+                        elif operands[0] == 'NOT':
                             opcode="0001000"
                             Rdest=register_to_binary(operands[1])
                             instruction=(opcode+"000000"+Rdest)
                         
-                        elif operands == ['NEG']:
+                        elif operands[0] == 'NEG':
                             opcode="0001001"
                             Rdest=register_to_binary(operands[1])
                             instruction=(opcode+"000000"+Rdest)

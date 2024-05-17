@@ -50,6 +50,8 @@ BEGIN
 			writeRegAddr_out <= (OTHERS => '0');
 			INT_out <= '0';
 			IN_PORT_EM <= (OTHERS => '0');
+			RTI_out <= '0';
+			CCR_out <= (others => '0');
 		ELSE
 			IF rising_edge(clk) THEN
 				write_enable_out <= write_enable;
@@ -68,6 +70,8 @@ BEGIN
 				writeRegAddr_out <= writeRegAddr;
 				INT_out <= INT;
 				IN_PORT_EM <= IN_PORT;
+				RTI_out <= RTI;
+				CCR_out <= CCR;
 			END IF;
 		END IF;
 	END PROCESS;
