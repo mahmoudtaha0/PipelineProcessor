@@ -21,11 +21,12 @@ ARCHITECTURE mymodel OF DataMemory IS
     TYPE ram_type_protect IS ARRAY(0 TO 2 ** 12 - 1) OF STD_LOGIC; -- 4096 1-bit words (4 KB)
     SIGNAL ram : ram_type;
     SIGNAL ram_protected : ram_type_protect;
-    SIGNAL SP_Signal : STD_LOGIC_VECTOR(31 DOWNTO 0);
+    -- SIGNAL SP_Signal : STD_LOGIC_VECTOR(31 DOWNTO 0);
     -- SIGNAL PC_signal : STD_LOGIC_VECTOR(31 DOWNTO 0);
 BEGIN
     PROCESS (clk, rst, memoryRead, Addr)
-    Variable PC_signal : STD_LOGIC_VECTOR(31 DOWNTO 0);
+        VARIABLE PC_signal : STD_LOGIC_VECTOR(31 DOWNTO 0);
+        VARIABLE SP_Signal : STD_LOGIC_VECTOR(31 DOWNTO 0);
     BEGIN
         IF rst = '1' THEN
             ram <= (OTHERS => (OTHERS => '0'));
@@ -34,9 +35,9 @@ BEGIN
             PC_out <= (OTHERS => '0');
             PC_signal := (OTHERS => '0');
             SP <= "00000000000000000000111111111111";
-            SP_Signal <= "00000000000000000000111111111111";
+            SP_Signal := "00000000000000000000111111111111";
         ELSIF rising_edge(clk) AND rst = '0' THEN
-            IF memoryWrite = '1' AND ram_protected(to_integer(unsigned(Addr))) = '0' AND push_en = '0' AND call_en = '0' THEN
+            IF memoryWrite = '1' AND ram_protected(to_integer(unsigned(Addr))) = '0' AND push_en = '0' AND call_en = '0' AND INT = '0' THEN
                 ram(to_integer(unsigned(Addr))) <= writeData(31 DOWNTO 16); -- WRITE
                 ram(to_integer(unsigned(Addr) + 1)) <= writeData(15 DOWNTO 0);
             ELSIF memoryWrite = '1' AND ram_protected(to_integer(unsigned(Addr))) = '1' THEN
@@ -49,49 +50,61 @@ BEGIN
                 ram(to_integer(unsigned(SP_Signal) - 1)) <= writeData(31 DOWNTO 16);
                 ram(to_integer(unsigned(SP_Signal))) <= writeData(15 DOWNTO 0);
                 SP <= STD_LOGIC_VECTOR(unsigned(SP_Signal) - 2);
-                SP_Signal <= STD_LOGIC_VECTOR(unsigned(SP_Signal) - 2);
+                SP_Signal := STD_LOGIC_VECTOR(unsigned(SP_Signal) - 2);
             ELSIF call_en = '1' AND memoryWrite = '1' THEN
                 PC_signal := STD_LOGIC_VECTOR(unsigned(PC) + 1);
                 ram(to_integer(unsigned(SP_Signal) - 1)) <= PC_signal(31 DOWNTO 16);
                 ram(to_integer(unsigned(SP_Signal))) <= PC_signal(15 DOWNTO 0);
                 SP <= STD_LOGIC_VECTOR(unsigned(SP_Signal) - 2);
-                SP_Signal <= STD_LOGIC_VECTOR(unsigned(SP_Signal) - 2);
+                SP_Signal := STD_LOGIC_VECTOR(unsigned(SP_Signal) - 2);
                 PC_out <= writeData;
-            ELSIF INT = '1' THEN
+            ELSIF INT = '1' AND memoryWrite = '1' THEN
                 -- SAVE PC
-                ram(to_integer(unsigned(SP_Signal) - 1)) <= PC(31 DOWNTO 16);
-                ram(to_integer(unsigned(SP_Signal))) <= PC(15 DOWNTO 0);
+                PC_signal := STD_LOGIC_VECTOR(unsigned(PC));
+                ram(to_integer(unsigned(SP_Signal) - 1)) <= PC_signal(31 DOWNTO 16);
+                ram(to_integer(unsigned(SP_Signal))) <= PC_signal(15 DOWNTO 0);
                 SP <= STD_LOGIC_VECTOR(unsigned(SP_Signal) - 2);
-                SP_Signal <= STD_LOGIC_VECTOR(unsigned(SP_Signal) - 2);
+                SP_Signal := STD_LOGIC_VECTOR(unsigned(SP_Signal) - 2);
                 -- SAVE CCR
                 ram(to_integer(unsigned(SP_Signal) - 1)) <= "0000000000000000";
                 ram(to_integer(unsigned(SP_Signal))) <= "000000000000" & CCR;
                 SP <= STD_LOGIC_VECTOR(unsigned(SP_Signal) - 2);
-                SP_Signal <= STD_LOGIC_VECTOR(unsigned(SP_Signal) - 2);
-                -- PC <- M[3], M[2]
-                PC_out <= ram(3) & ram(2);
-            ELSIF RTI = '1' OR ret_en = '1' THEN
-                -- RESTORE PC
-                SP <= STD_LOGIC_VECTOR(unsigned(SP_Signal) + 2);
-                SP_Signal <= STD_LOGIC_VECTOR(unsigned(SP_Signal) + 2);
-                PC_out <= ram(to_integer(unsigned(SP_Signal) - 1)) & ram(to_integer(unsigned(SP_Signal)));
-                -- RESTORE CCR if RTI
-                IF RTI = '1' THEN
-                    CCR_out <= ram(to_integer(unsigned(SP_Signal)))(3 DOWNTO 0);
-                END IF;
-                SP <= STD_LOGIC_VECTOR(unsigned(SP_Signal) + 2);
-                SP_Signal <= STD_LOGIC_VECTOR(unsigned(SP_Signal) + 2);
+                SP_Signal := STD_LOGIC_VECTOR(unsigned(SP_Signal) - 2);
+                -- ELSIF RTI = '1' OR ret_en = '1' THEN
+                --     -- RESTORE PC
+                --     SP <= STD_LOGIC_VECTOR(unsigned(SP_Signal) + 2);
+                --     SP_Signal := STD_LOGIC_VECTOR(unsigned(SP_Signal) + 2);
+                --     PC_out <= ram(to_integer(unsigned(SP_Signal) - 1)) & ram(to_integer(unsigned(SP_Signal)));
+                --     SP <= STD_LOGIC_VECTOR(unsigned(SP_Signal) + 2);
+                --     SP_Signal := STD_LOGIC_VECTOR(unsigned(SP_Signal) + 2);
+                --     -- RESTORE CCR if RTI
+                --     IF RTI = '1' THEN
+                --         CCR_out <= ram(to_integer(unsigned(SP_Signal)))(3 DOWNTO 0);
+                --END IF;
             END IF;
         ELSIF falling_edge(clk) THEN
             violation_signal <= '0';
-            IF memoryRead = '1' AND push_en = '0' AND pop_en = '0' AND call_en = '0' THEN -- READ
+            IF memoryRead = '1' AND push_en = '0' AND pop_en = '0' AND call_en = '0' AND INT = '0' AND RTI = '0' AND ret_en = '0' THEN -- READ
                 readData(31 DOWNTO 16) <= ram(to_integer(unsigned(Addr)));
                 readData(15 DOWNTO 0) <= ram(to_integer(unsigned(Addr) + 1));
             ELSIF memoryRead = '1' AND pop_en = '1' THEN -- POP
                 readData(31 DOWNTO 16) <= ram(to_integer(unsigned(SP_Signal) + 1));
-                readData(15 DOWNTO 0) <= ram(to_integer(unsigned(SP_Signal) + 2));
+                readData(15 DOWNTO 0) <= ram(to_integer(unsigned(SP_Signal)) + 2);
                 SP <= STD_LOGIC_VECTOR(unsigned(SP_Signal) + 2);
-                SP_Signal <= STD_LOGIC_VECTOR(unsigned(SP_Signal) + 2);
+                SP_Signal := STD_LOGIC_VECTOR(unsigned(SP_Signal) + 2);
+            ELSIF memoryRead = '1' AND INT = '1' THEN
+                PC_out <= ram(2) & ram(3);
+            ELSIF RTI = '1' AND memoryRead = '1' THEN
+                SP <= STD_LOGIC_VECTOR(unsigned(SP_Signal) + 2);
+                SP_Signal := STD_LOGIC_VECTOR(unsigned(SP_Signal) + 2);
+                CCR_out <= ram(to_integer(unsigned(SP_Signal)))(3 DOWNTO 0);
+                SP <= STD_LOGIC_VECTOR(unsigned(SP_Signal) + 2);
+                SP_Signal := STD_LOGIC_VECTOR(unsigned(SP_Signal) + 2);
+                PC_out <= ram(to_integer(unsigned(SP_Signal) - 1)) & ram(to_integer(unsigned(SP_Signal)));
+            ELSIF ret_en = '1' AND memoryRead = '1' THEN
+                SP <= STD_LOGIC_VECTOR(unsigned(SP_Signal) + 2);
+                SP_Signal := STD_LOGIC_VECTOR(unsigned(SP_Signal) + 2);
+                PC_out <= ram(to_integer(unsigned(SP_Signal) - 1)) & ram(to_integer(unsigned(SP_Signal)));
             ELSE
                 readData <= (OTHERS => '0');
             END IF;
