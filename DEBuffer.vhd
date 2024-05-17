@@ -7,6 +7,10 @@ ENTITY DEBuffer IS
         -- inputs
         readdata1, readdata2 : IN STD_LOGIC_VECTOR (31 DOWNTO 0);
         writeRegAddr : IN STD_LOGIC_VECTOR (2 DOWNTO 0);
+        instruction_DE_IN : IN STD_LOGIC_VECTOR(15 DOWNTO 0);
+        instruction_DE_OUT : OUT STD_LOGIC_VECTOR(15 DOWNTO 0);
+        ALU_CODE_DE_IN : IN STD_LOGIC_VECTOR(3 DOWNTO 0);
+        ALU_CODE_DE_OUT : OUT STD_LOGIC_VECTOR(3 DOWNTO 0);
         --pc: in std_logic_vector (31 downto 0);
         clk, imm_enable, reset, aluimm, alu_enable, write_enable, memorywrite, memoryread : IN STD_LOGIC;
         imm_value : IN STD_LOGIC_VECTOR (15 DOWNTO 0);
@@ -49,6 +53,8 @@ BEGIN
             INT_out <= '0';
             IN_PORT_DE <= (OTHERS => '0');
             RTI_out <= '0';
+            instruction_DE_OUT <= (others => '0');
+            ALU_CODE_DE_OUT <= "0000";
         ELSE
             IF rising_edge(clk) and Stall = '0' THEN
                 readdata1_out <= readdata1;
@@ -68,6 +74,9 @@ BEGIN
                 RTI_out <= RTI;
 
                 IN_PORT_DE <= IN_PORT;
+                instruction_DE_OUT <= instruction_DE_IN;
+                ALU_CODE_DE_OUT <= ALU_CODE_DE_IN;
+                
 
                 IF imm_value(15) = '0' THEN
                     imm_value_out <= (31 DOWNTO 16 => '0') & imm_value;

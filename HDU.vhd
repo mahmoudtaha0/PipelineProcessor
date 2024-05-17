@@ -8,7 +8,6 @@ ENTITY HDU IS
         EA : IN STD_LOGIC_VECTOR(15 DOWNTO 0);
         Instruction : IN STD_LOGIC_VECTOR(15 DOWNTO 0);
         Previous_instruction : IN STD_LOGIC_VECTOR(15 DOWNTO 0);
-        OF_Handle, exception : OUT STD_LOGIC;
         Forward_op1 : OUT STD_LOGIC_VECTOR(1 DOWNTO 0);
         Forward_op2 : OUT STD_LOGIC_VECTOR(1 DOWNTO 0);
         Alu_control : IN STD_LOGIC_VECTOR(3 DOWNTO 0);
@@ -55,7 +54,5 @@ BEGIN
     Flush(0) <= '1' WHEN Previous_instruction(15 DOWNTO 9) = "1010000" OR Previous_instruction(15 DOWNTO 9) = "0111000" OR Previous_instruction(15 DOWNTO 9) = "0111001" --flush FD buffer for immidiate
         ELSE
     '0';
-    exception <= '1' WHEN protection_violation = '1' ELSE
-        '0';
 
 END ARCHITECTURE;

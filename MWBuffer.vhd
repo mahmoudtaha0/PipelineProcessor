@@ -8,12 +8,13 @@ ENTITY MWBuffer IS
 		clk, reset, write_enable : IN STD_LOGIC;
 		writeRegAddr : IN STD_LOGIC_VECTOR (2 DOWNTO 0);
 		readdata2, alu_result : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
+		alu_result_out : out std_logic_vector(31 downto 0);
 		imm_value : IN STD_LOGIC_VECTOR (31 DOWNTO 0);
 		imm_enable : IN STD_LOGIC;
 		--outputs
 		write_enable_out : OUT STD_LOGIC;
 		imm_enable_out : OUT STD_LOGIC;
-		readdata2_out, alu_result_out : OUT STD_LOGIC_VECTOR(31 DOWNTO 0);
+		readdata2_out : OUT STD_LOGIC_VECTOR(31 DOWNTO 0);
 		imm_value_out : OUT STD_LOGIC_VECTOR (31 DOWNTO 0);
 		writeRegAddr_out : OUT STD_LOGIC_VECTOR (2 DOWNTO 0);
 		IN_PORT : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
