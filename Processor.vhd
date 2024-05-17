@@ -124,13 +124,14 @@ ARCHITECTURE my_model OF Processor IS
 	COMPONENT DataMemory IS
 		PORT (
 			rst, memoryWrite, memoryRead, clk, protect_enable, free_enable, push_en, pop_en, call_en, ret_en : IN STD_LOGIC;
-			writeData, Add : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
+			writeData, Addr : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
 			PC : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
 			readData, PC_out : OUT STD_LOGIC_VECTOR(31 DOWNTO 0);
 			violation_signal : OUT STD_LOGIC;
 			INT, RTI : IN STD_LOGIC;
 			CCR : IN STD_LOGIC_VECTOR(3 DOWNTO 0);
-			CCR_out : OUT STD_LOGIC_VECTOR(3 DOWNTO 0)
+			CCR_out : OUT STD_LOGIC_VECTOR(3 DOWNTO 0);
+			SP : OUT STD_LOGIC_VECTOR(31 DOWNTO 0)
 		);
 	END COMPONENT;
 	COMPONENT MWBuffer IS
@@ -237,6 +238,7 @@ ARCHITECTURE my_model OF Processor IS
 	SIGNAL IN_PORT_EN : STD_LOGIC;
 	SIGNAL ReadData1_MW_Buffer, ReadData2_EM_Buffer : STD_LOGIC_VECTOR(31 DOWNTO 0);
 	SIGNAL SWAP_EN : STD_LOGIC;
+	SIGNAL stack_pointer : STD_LOGIC_VECTOR(31 DOWNTO 0);
 BEGIN
 	branch_pc <= INT_Controller OR RTI_Controller OR returnEnable_controller;
 	jump_pc <= jump_controller OR jumpZ_controller OR callEnable_controller;
@@ -312,9 +314,9 @@ BEGIN
 
 	U13 : DataMemory PORT MAP(
 		rst => rst_controller, memoryWrite => Memory_write_EMBuffer_DataMemory, memoryRead => Memory_Read_EMBuffer_DataMemory,
-		clk => clk, Add => AluResult_EMBuffer_DataMemory, writeData => ReadData1_EM_Buffer,
+		clk => clk, Addr => AluResult_EMBuffer_DataMemory, writeData => ReadData1_EM_Buffer,
 		readData => ReadData_DataMemory_MWBuffer, INT => EM_INT, RTI => EM_RTI, CCR => CCR_EM, CCR_out => CCR_DM, PC_out => PC_OP, protect_enable => protect_controller, free_enable => free_controller, push_en => push_controller, pop_en => pop_controller,
-		call_en => callEnable_controller, ret_en => returnEnable_controller, PC => PC
+		call_en => callEnable_controller, ret_en => returnEnable_controller, PC => PC, SP => stack_pointer
 	);
 
 	U14 : CCR PORT MAP(CCR_IN => CCR_DM, CCR_OUT => CCR_OP);
