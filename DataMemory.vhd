@@ -46,6 +46,7 @@ BEGIN
                 ram_protected(to_integer(unsigned(Addr))) <= '1';
             ELSIF free_enable = '1' THEN
                 ram_protected(to_integer(unsigned(Addr))) <= '0';
+                ram(to_integer(unsigned(Addr))) <= (others => '0');
             ELSIF memoryWrite = '1' AND push_en = '1' THEN -- Push
                 ram(to_integer(unsigned(SP_Signal) - 1)) <= writeData(31 DOWNTO 16);
                 ram(to_integer(unsigned(SP_Signal))) <= writeData(15 DOWNTO 0);
