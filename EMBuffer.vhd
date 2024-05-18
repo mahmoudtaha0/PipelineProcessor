@@ -13,6 +13,7 @@ ENTITY EMBuffer IS
 		--pc: in std_logic_vector (31 downto 0);
 		imm_value : IN STD_LOGIC_VECTOR (31 DOWNTO 0);
 		imm_enable : IN STD_LOGIC;
+		out_port_in : IN STD_LOGIC;
 		--outputs
 		write_enable_out, memoryread_out, memorywrite_out : OUT STD_LOGIC;
 		alu_result_out, dataout1, dataout2 : OUT STD_LOGIC_VECTOR (31 DOWNTO 0);
@@ -26,6 +27,7 @@ ENTITY EMBuffer IS
 		CCR : IN STD_LOGIC_VECTOR(3 DOWNTO 0);
 		CCR_out : OUT STD_LOGIC_VECTOR(3 DOWNTO 0);
 		IN_PORT : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
+		out_port_out : OUT STD_LOGIC;
 		IN_PORT_EM : OUT STD_LOGIC_VECTOR(31 DOWNTO 0)
 	);
 END EMBuffer;
@@ -53,6 +55,7 @@ BEGIN
 			IN_PORT_EM <= (OTHERS => '0');
 			RTI_out <= '0';
 			CCR_out <= (OTHERS => '0');
+			out_port_out <= '0';
 		ELSE
 			IF rising_edge(clk) AND EM_Flush = '0' THEN
 				write_enable_out <= write_enable;
@@ -73,6 +76,7 @@ BEGIN
 				IN_PORT_EM <= IN_PORT;
 				RTI_out <= RTI;
 				CCR_out <= CCR;
+				out_port_out <= out_port_in;
 			ELSIF rising_edge(clk) AND EM_Flush = '1' THEN
 				write_enable_out <= '0';
 				--return_enable_out <= '0';
@@ -92,6 +96,7 @@ BEGIN
 				IN_PORT_EM <= (OTHERS => '0');
 				RTI_out <= '0';
 				CCR_out <= (OTHERS => '0');
+				out_port_out <= '0';
 			END IF;
 		END IF;
 	END PROCESS;

@@ -7,7 +7,7 @@ ENTITY Controller IS
 		opcode : IN STD_LOGIC_VECTOR(6 DOWNTO 0);
 		reset_input : IN STD_LOGIC;
 		ZF : IN STD_LOGIC;
-		jump, jumpZ, rst, immEnable, immFlush, memoryWrite, memoryRead, returnEnable, callEnable, aluImm, writeEnable, alu_enable, oneoperand, swap_enable, protect_enable, free_enable, push_enable, pop_enable : OUT STD_LOGIC;
+		jump, jumpZ, rst, immEnable, immFlush, memoryWrite, memoryRead, returnEnable, callEnable, aluImm, writeEnable, alu_enable, oneoperand, swap_enable, protect_enable, free_enable, push_enable, pop_enable, Out_port : OUT STD_LOGIC;
 		opcode_to_alu : OUT STD_LOGIC_VECTOR(6 DOWNTO 0);
 		INT, RTI : OUT STD_LOGIC
 	);
@@ -37,6 +37,7 @@ BEGIN
 			free_enable <= '0';
 			push_enable <= '0';
 			pop_enable <= '0';
+			Out_port <= '0';
 		ELSE
 			CASE opcode IS
 				WHEN "0000000" =>
@@ -59,6 +60,7 @@ BEGIN
 					free_enable <= '0';
 					push_enable <= '0';
 					pop_enable <= '0';
+					Out_port <= '0';
 				WHEN "0000001" => --reset
 					rst <= '1';
 					jump <= '0';
@@ -79,6 +81,7 @@ BEGIN
 					free_enable <= '0';
 					push_enable <= '0';
 					pop_enable <= '0';
+					Out_port <= '0';
 				WHEN "0101001" => -- SWAP
 					rst <= '0';
 					jump <= '0';
@@ -100,6 +103,7 @@ BEGIN
 					free_enable <= '0';
 					push_enable <= '0';
 					pop_enable <= '0';
+					Out_port <= '0';
 				WHEN "0101000" => --move
 					rst <= '0';
 					jump <= '0';
@@ -121,6 +125,7 @@ BEGIN
 					free_enable <= '0';
 					push_enable <= '0';
 					pop_enable <= '0';
+					Out_port <= '0';
 				WHEN "0001101" => --in
 					rst <= '0';
 					jump <= '0';
@@ -141,6 +146,7 @@ BEGIN
 					free_enable <= '0';
 					push_enable <= '0';
 					pop_enable <= '0';
+					Out_port <= '0';
 				WHEN "0110000" | "0110001" | "0110010" | "0110011" | "0110100" => --add|sub|and|or|xor
 					rst <= '0';
 					jump <= '0';
@@ -161,6 +167,7 @@ BEGIN
 					push_enable <= '0';
 					pop_enable <= '0';
 					protect_enable <= '0';
+					Out_port <= '0';
 				WHEN "0001011" | "0001010" | "0001001" | "0001000" => --dec|inc|neg|not
 					rst <= '0';
 					jump <= '0';
@@ -181,6 +188,7 @@ BEGIN
 					free_enable <= '0';
 					push_enable <= '0';
 					pop_enable <= '0';
+					Out_port <= '0';
 				WHEN "0001100" => --out
 					rst <= '0';
 					jump <= '0';
@@ -194,13 +202,14 @@ BEGIN
 					aluImm <= '0';
 					writeEnable <= '0';
 					alu_enable <= '0';
-					oneoperand <= '1';
+					oneoperand <= '0';
 					INT <= '0';
 					RTI <= '0';
 					protect_enable <= '0';
 					free_enable <= '0';
 					push_enable <= '0';
 					pop_enable <= '0';
+					Out_port <= '1';
 				WHEN "0100000" => --cmp
 					rst <= '0';
 					jump <= '0';
@@ -221,6 +230,7 @@ BEGIN
 					free_enable <= '0';
 					push_enable <= '0';
 					pop_enable <= '0';
+					Out_port <= '0';
 				WHEN "0111000" | "0111001" => --addi|subi
 					rst <= '0';
 					jump <= '0';
@@ -241,6 +251,7 @@ BEGIN
 					free_enable <= '0';
 					push_enable <= '0';
 					pop_enable <= '0';
+					Out_port <= '0';
 				WHEN "1001000" => --push
 					rst <= '0';
 					jump <= '0';
@@ -261,6 +272,7 @@ BEGIN
 					free_enable <= '0';
 					push_enable <= '1';
 					pop_enable <= '0';
+					Out_port <= '0';
 				WHEN "1001001" => --pop
 					rst <= '0';
 					jump <= '0';
@@ -281,6 +293,7 @@ BEGIN
 					free_enable <= '0';
 					push_enable <= '0';
 					pop_enable <= '1';
+					Out_port <= '0';
 				WHEN "1010000" => --Load immediate
 					rst <= '0';
 					jump <= '0';
@@ -301,6 +314,7 @@ BEGIN
 					free_enable <= '0';
 					push_enable <= '0';
 					pop_enable <= '0';
+					Out_port <= '0';
 				WHEN "1011000" => --Load
 					rst <= '0';
 					jump <= '0';
@@ -321,6 +335,7 @@ BEGIN
 					free_enable <= '0';
 					push_enable <= '0';
 					pop_enable <= '0';
+					Out_port <= '0';
 				WHEN "1011001" => --store
 					rst <= '0';
 					jump <= '0';
@@ -341,6 +356,7 @@ BEGIN
 					free_enable <= '0';
 					push_enable <= '0';
 					pop_enable <= '0';
+					Out_port <= '0';
 				WHEN "1101000" => --jz
 					rst <= '0';
 					jump <= '0';
@@ -361,6 +377,7 @@ BEGIN
 					free_enable <= '0';
 					push_enable <= '0';
 					pop_enable <= '0';
+					Out_port <= '0';
 				WHEN "1101001" => --jump
 					rst <= '0';
 					jump <= '1';
@@ -381,6 +398,7 @@ BEGIN
 					free_enable <= '0';
 					push_enable <= '0';
 					pop_enable <= '0';
+					Out_port <= '0';
 				WHEN "1101010" => --call
 					rst <= '0';
 					jump <= '0';
@@ -401,6 +419,7 @@ BEGIN
 					free_enable <= '0';
 					push_enable <= '0';
 					pop_enable <= '0';
+					Out_port <= '0';
 				WHEN "1100000" => --return
 					rst <= '0';
 					jump <= '0';
@@ -421,6 +440,7 @@ BEGIN
 					free_enable <= '0';
 					push_enable <= '0';
 					pop_enable <= '0';
+					Out_port <= '0';
 				WHEN "0000010" => -- INT
 					rst <= '0';
 					jump <= '0';
@@ -441,6 +461,7 @@ BEGIN
 					free_enable <= '0';
 					push_enable <= '0';
 					pop_enable <= '0';
+					Out_port <= '0';
 				WHEN "1100001" => -- RTI
 					rst <= '0';
 					jump <= '0';
@@ -461,6 +482,7 @@ BEGIN
 					free_enable <= '0';
 					push_enable <= '0';
 					pop_enable <= '0';
+					Out_port <= '0';
 				WHEN "1000000" => -- PROTECT
 					rst <= '0';
 					jump <= '0';
@@ -481,6 +503,7 @@ BEGIN
 					free_enable <= '0';
 					push_enable <= '0';
 					pop_enable <= '0';
+					Out_port <= '0';
 				WHEN "1000001" => -- FREE
 					rst <= '0';
 					jump <= '0';
@@ -501,6 +524,7 @@ BEGIN
 					free_enable <= '1';
 					push_enable <= '0';
 					pop_enable <= '0';
+					Out_port <= '0';
 				WHEN OTHERS =>
 					rst <= '0';
 					jump <= '0';
@@ -521,6 +545,7 @@ BEGIN
 					free_enable <= '0';
 					push_enable <= '0';
 					pop_enable <= '0';
+					Out_port <= '0';
 			END CASE;
 		END IF;
 		opcode_to_alu <= opcode;

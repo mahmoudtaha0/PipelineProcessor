@@ -16,6 +16,7 @@ ENTITY DEBuffer IS
         clk, imm_enable, reset, aluimm, alu_enable, write_enable, memorywrite, memoryread : IN STD_LOGIC;
         imm_value : IN STD_LOGIC_VECTOR (15 DOWNTO 0);
         opcode : IN STD_LOGIC_VECTOR (6 DOWNTO 0);
+        out_port_in : IN STD_LOGIC;
         --call_enable,return_enable: in std_logic;
         -- outputs
         readdata1_out, readdata2_out, imm_value_out : OUT STD_LOGIC_VECTOR (31 DOWNTO 0);
@@ -26,6 +27,7 @@ ENTITY DEBuffer IS
         Stall : IN STD_LOGIC;
         INT_out, RTI_out : OUT STD_LOGIC;
         IN_PORT : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
+        out_port_out : OUT STD_LOGIC;
         IN_PORT_DE : OUT STD_LOGIC_VECTOR(31 DOWNTO 0)
         --pc_out: out std_logic_vector (31 downto 0)
         --return_enable_out,call_enable_out : out std_logic;
@@ -56,6 +58,7 @@ BEGIN
             RTI_out <= '0';
             instruction_DE_OUT <= (OTHERS => '0');
             ALU_CODE_DE_OUT <= "0000";
+            out_port_out <= '0';
         ELSE
             IF rising_edge(clk) AND Stall = '0' AND DE_Flush = '0' THEN
                 readdata1_out <= readdata1;
@@ -73,6 +76,7 @@ BEGIN
                 opcode_out <= opcode;
                 INT_out <= INT;
                 RTI_out <= RTI;
+                out_port_out <= out_port_in;
 
                 IN_PORT_DE <= IN_PORT;
                 instruction_DE_OUT <= instruction_DE_IN;
@@ -102,6 +106,7 @@ BEGIN
                 RTI_out <= '0';
                 instruction_DE_OUT <= (OTHERS => '0');
                 ALU_CODE_DE_OUT <= "0000";
+                out_port_out <= '0';
             END IF;
         END IF;
     END PROCESS;
