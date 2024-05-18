@@ -5,6 +5,7 @@ USE IEEE.numeric_std.ALL;
 ENTITY EMBuffer IS
 	PORT (
 		--inputs
+		EM_Flush : IN STD_LOGIC;
 		clk, write_enable, reset, memoryread, memorywrite : IN STD_LOGIC;
 		writeRegAddr : IN STD_LOGIC_VECTOR (2 DOWNTO 0);
 		--return_enable,call_enable,overflow,zeroflag : in std_logic;;
@@ -44,16 +45,16 @@ BEGIN
 			imm_enable_out <= '0';
 			alu_result_out <= (OTHERS => '0');
 			dataout1 <= (OTHERS => '0');
-			dataout2 <= (others => '0');
+			dataout2 <= (OTHERS => '0');
 			--overflow_out<= '0';
 			--zeroflag_out<= '0';
 			writeRegAddr_out <= (OTHERS => '0');
 			INT_out <= '0';
 			IN_PORT_EM <= (OTHERS => '0');
 			RTI_out <= '0';
-			CCR_out <= (others => '0');
+			CCR_out <= (OTHERS => '0');
 		ELSE
-			IF rising_edge(clk) THEN
+			IF rising_edge(clk) AND EM_Flush = '0' THEN
 				write_enable_out <= write_enable;
 				--return_enable_out <= return_enable;
 				--call_enable_out<= call_enable;
@@ -72,6 +73,25 @@ BEGIN
 				IN_PORT_EM <= IN_PORT;
 				RTI_out <= RTI;
 				CCR_out <= CCR;
+			ELSIF rising_edge(clk) AND EM_Flush = '1' THEN
+				write_enable_out <= '0';
+				--return_enable_out <= '0';
+				--call_enable_out<= '0';
+				memoryread_out <= '0';
+				memorywrite_out <= '0';
+				-- pc_out <= (others => '0');
+				imm_value_out <= (OTHERS => '0');
+				imm_enable_out <= '0';
+				alu_result_out <= (OTHERS => '0');
+				dataout1 <= (OTHERS => '0');
+				dataout2 <= (OTHERS => '0');
+				--overflow_out<= '0';
+				--zeroflag_out<= '0';
+				writeRegAddr_out <= (OTHERS => '0');
+				INT_out <= '0';
+				IN_PORT_EM <= (OTHERS => '0');
+				RTI_out <= '0';
+				CCR_out <= (OTHERS => '0');
 			END IF;
 		END IF;
 	END PROCESS;

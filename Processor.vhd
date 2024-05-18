@@ -33,9 +33,11 @@ ARCHITECTURE my_model OF Processor IS
 			clk, FD_reset, FD_enable : IN STD_LOGIC;
 			Given_instruction : IN STD_LOGIC_VECTOR(15 DOWNTO 0);
 			Op_code : OUT STD_LOGIC_VECTOR(6 DOWNTO 0);
+			Given_instruction_output : OUT STD_LOGIC_VECTOR(15 DOWNTO 0);
 			To_RegFile_data : OUT STD_LOGIC_VECTOR(8 DOWNTO 0);
 			To_RegFile_op_Code : OUT STD_LOGIC_VECTOR(1 DOWNTO 0);
 			IN_PORT : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
+			FD_flush : IN STD_LOGIC;
 			IN_PORT_FD : OUT STD_LOGIC_VECTOR(31 DOWNTO 0)
 		);
 	END COMPONENT;
@@ -51,16 +53,17 @@ ARCHITECTURE my_model OF Processor IS
 	COMPONENT DEBuffer IS
 		PORT (
 			-- inputs
+			DE_Flush : IN STD_LOGIC;
 			readdata1, readdata2 : IN STD_LOGIC_VECTOR (31 DOWNTO 0);
 			writeRegAddr : IN STD_LOGIC_VECTOR (2 DOWNTO 0);
-			--pc: in std_logic_vector (31 downto 0);
-			clk, imm_enable, reset, aluimm, alu_enable, write_enable, memorywrite, memoryread : IN STD_LOGIC;
-			imm_value : IN STD_LOGIC_VECTOR (15 DOWNTO 0);
-			opcode : IN STD_LOGIC_VECTOR (6 DOWNTO 0);
 			instruction_DE_IN : IN STD_LOGIC_VECTOR(15 DOWNTO 0);
 			instruction_DE_OUT : OUT STD_LOGIC_VECTOR(15 DOWNTO 0);
 			ALU_CODE_DE_IN : IN STD_LOGIC_VECTOR(3 DOWNTO 0);
 			ALU_CODE_DE_OUT : OUT STD_LOGIC_VECTOR(3 DOWNTO 0);
+			--pc: in std_logic_vector (31 downto 0);
+			clk, imm_enable, reset, aluimm, alu_enable, write_enable, memorywrite, memoryread : IN STD_LOGIC;
+			imm_value : IN STD_LOGIC_VECTOR (15 DOWNTO 0);
+			opcode : IN STD_LOGIC_VECTOR (6 DOWNTO 0);
 			--call_enable,return_enable: in std_logic;
 			-- outputs
 			readdata1_out, readdata2_out, imm_value_out : OUT STD_LOGIC_VECTOR (31 DOWNTO 0);
@@ -104,6 +107,7 @@ ARCHITECTURE my_model OF Processor IS
 	COMPONENT EMBuffer IS
 		PORT (
 			--inputs
+			EM_Flush : IN STD_LOGIC;
 			clk, write_enable, reset, memoryread, memorywrite : IN STD_LOGIC;
 			writeRegAddr : IN STD_LOGIC_VECTOR (2 DOWNTO 0);
 			--return_enable,call_enable,overflow,zeroflag : in std_logic;;
@@ -143,12 +147,14 @@ ARCHITECTURE my_model OF Processor IS
 	COMPONENT MWBuffer IS
 		PORT (
 			--inputs
+			MW_Flush : IN STD_LOGIC;
 			clk, reset, write_enable : IN STD_LOGIC;
 			writeRegAddr : IN STD_LOGIC_VECTOR (2 DOWNTO 0);
 			readdata2, alu_result : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
+			alu_result_out : OUT STD_LOGIC_VECTOR(31 DOWNTO 0);
 			imm_value : IN STD_LOGIC_VECTOR (31 DOWNTO 0);
 			imm_enable : IN STD_LOGIC;
-			alu_result_out : OUT STD_LOGIC_VECTOR(31 DOWNTO 0);
+			FW_op1, FW_op2 : IN STD_LOGIC_VECTOR (1 DOWNTO 0);
 			--outputs
 			write_enable_out : OUT STD_LOGIC;
 			imm_enable_out : OUT STD_LOGIC;
@@ -158,6 +164,7 @@ ARCHITECTURE my_model OF Processor IS
 			IN_PORT : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
 			IN_PORT_MW : OUT STD_LOGIC_VECTOR(31 DOWNTO 0);
 			ReadData1 : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
+			FW_op1_out, FW_op2_out : OUT STD_LOGIC_VECTOR (1 DOWNTO 0);
 			ReadData1_MW : OUT STD_LOGIC_VECTOR(31 DOWNTO 0)
 		);
 	END COMPONENT;
@@ -210,23 +217,21 @@ ARCHITECTURE my_model OF Processor IS
 			INT_Enable, MemR, MemW, protection_violation : IN STD_LOGIC;
 			EA : IN STD_LOGIC_VECTOR(15 DOWNTO 0);
 			Instruction : IN STD_LOGIC_VECTOR(15 DOWNTO 0);
-			Previous_instruction : IN STD_LOGIC_VECTOR(15 DOWNTO 0);
-			Forward_op1 : OUT STD_LOGIC_VECTOR(1 DOWNTO 0);
-			Forward_op2 : OUT STD_LOGIC_VECTOR(1 DOWNTO 0);
-			Alu_control : IN STD_LOGIC_VECTOR(3 DOWNTO 0);
-			Alu_control_prev : IN STD_LOGIC_VECTOR(3 DOWNTO 0);
+			Rdst_ExMem, Rdst_MemWb : IN STD_LOGIC_VECTOR(2 DOWNTO 0);
+			-- Previous_instruction : IN STD_LOGIC_VECTOR(15 DOWNTO 0);
+			WE_ExMem, WE_MemWb : IN STD_LOGIC;
+			Forward_op1, Forward_op2 : OUT STD_LOGIC_VECTOR(1 DOWNTO 0);
 			Stall, Flush : OUT STD_LOGIC_VECTOR (3 DOWNTO 0)
 			-- Fadel el selka el beida
 		);
 	END COMPONENT;
 	COMPONENT ForwardingUnit IS
 		PORT (
-			Forward_Sig : IN STD_LOGIC_VECTOR(1 DOWNTO 0);
+			Forward_op1, Forward_op2 : IN STD_LOGIC_VECTOR(1 DOWNTO 0);
 			-- 00: No forwarding, 01: ALU_ALU, 11: MEM_ALU
 			ALU_Result : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
 			MEM_Loaded : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
-			Forwarded_data : OUT STD_LOGIC_VECTOR(31 DOWNTO 0)
-
+			Forwarded_data_op1, Forwarded_data_op2 : OUT STD_LOGIC_VECTOR(31 DOWNTO 0)
 		);
 	END COMPONENT;
 
@@ -266,7 +271,7 @@ ARCHITECTURE my_model OF Processor IS
 	SIGNAL FD_IP, DE_IP, EM_IP, MW_IP : STD_LOGIC_VECTOR(31 DOWNTO 0);
 	SIGNAL write_data1_regfile : STD_LOGIC_VECTOR(31 DOWNTO 0);
 	SIGNAL write_data2_regfile : STD_LOGIC_VECTOR(31 DOWNTO 0);
-	SIGNAL IN_PORT_EN : STD_LOGIC;
+	SIGNAL IN_PORT_EN : STD_LOGIC := '0'; -------------- 
 	SIGNAL ReadData1_MW_Buffer, ReadData2_EM_Buffer : STD_LOGIC_VECTOR(31 DOWNTO 0);
 	SIGNAL SWAP_EN : STD_LOGIC;
 	SIGNAL stack_pointer : STD_LOGIC_VECTOR(31 DOWNTO 0);
@@ -274,12 +279,14 @@ ARCHITECTURE my_model OF Processor IS
 	SIGNAL violation_sig : STD_LOGIC;
 	SIGNAL Exception : STD_LOGIC;
 	SIGNAL instructionDE : STD_LOGIC_VECTOR(15 DOWNTO 0);
-	SIGNAL stall_HDU, flush_HDU : STD_LOGIC_VECTOR(3 DOWNTO 0);
+	SIGNAL stall_HDU : STD_LOGIC_VECTOR(3 DOWNTO 0) := (OTHERS => '0');
+	SIGNAL flush_HDU : STD_LOGIC_VECTOR(3 DOWNTO 0) := (OTHERS => '0');
 	SIGNAL ALU_CODE_DE : STD_LOGIC_VECTOR(3 DOWNTO 0);
-	SIGNAL FW_OP1, FW_OP2 : STD_LOGIC_VECTOR(1 DOWNTO 0);
-	SIGNAL alu_result_MW : STD_LOGIC_VECTOR(31 DOWNTO 0);
-	SIGNAL FW_Sig : STD_LOGIC_VECTOR(1 DOWNTO 0);
-	SIGNAL Forwarded_Data : STD_LOGIC_VECTOR(31 DOWNTO 0);
+	SIGNAL FW_OP1 : STD_LOGIC_VECTOR(1 DOWNTO 0) := "00";
+	SIGNAL FW_OP2 : STD_LOGIC_VECTOR(1 DOWNTO 0) := "00";
+	SIGNAL FW_OP1_sig, FW_OP2_sig : STD_LOGIC_VECTOR(1 DOWNTO 0);
+	SIGNAL Forwarded_Data1, Forwarded_Data2 : STD_LOGIC_VECTOR(31 DOWNTO 0);
+	SIGNAL op2_imm_mux, op2_imm_forward, op1_forward : STD_LOGIC_VECTOR(31 DOWNTO 0);
 BEGIN
 	branch_pc <= INT_Controller OR RTI_Controller OR returnEnable_controller;
 	jump_pc <= jump_controller OR jumpZ_controller OR callEnable_controller;
@@ -303,7 +310,7 @@ BEGIN
 	U4 : FetchDecodeBuffer1 PORT MAP(
 		clk => clk, FD_reset => reset, FD_enable => enable, Given_instruction => Demux_output_FDBuffer,
 		Op_code => op_code_FDBuffer_controller, To_RegFile_data => data_FDBuffer_regFile,
-		To_RegFile_op_Code => op_code_FDBuffer_RegFile, IN_PORT => inputport, IN_PORT_FD => FD_IP);
+		To_RegFile_op_Code => op_code_FDBuffer_RegFile, IN_PORT => inputport, IN_PORT_FD => FD_IP, FD_flush => flush_HDU(0));
 
 	U5 : Controller PORT MAP(
 		opcode => op_code_FDBuffer_controller, reset_input => reset, jump => jump_controller,
@@ -321,7 +328,7 @@ BEGIN
 	U7 : register_file PORT MAP(
 		clk => clk, rst => reset, write_enable => Write_Enable_MWBuffer_Mux, write_addr1 => writeAdd_WBBuffer_RefFile, write_addr2 => data_FDBuffer_regFile(2 DOWNTO 0),
 		read_addr_1 => reg_file_mux_out, read_addr_2 => data_FDBuffer_regFile(5 DOWNTO 3),
-		write_data1 => writedata_WBBuffer_RefFile, write_data2 => write_data2_regfile, read_data_1 => ReadData1_RegFile_DEBuffer, read_data_2 => ReadData2_RegFile_DEBuffer, swap_enable => SWAP_EN);
+		write_data1 => write_data1_regfile, write_data2 => write_data2_regfile, read_data_1 => ReadData1_RegFile_DEBuffer, read_data_2 => ReadData2_RegFile_DEBuffer, swap_enable => SWAP_EN);
 
 	U8 : ALU_Control PORT MAP(
 		opcode => op_code_DEBuffer_ALU, ALU_Code => ALU_OPCODE);
@@ -334,28 +341,22 @@ BEGIN
 		readdata2_out => ReadData2Out_DEBuffer_Alu, imm_value_out => ImmValue_DEBuffer_Demux, memoryread_out => MemoryRead_DEBuffer_EMBuffer,
 		memorywrite_out => MemoryWrite_DEBuffer_EMBuffer, write_enable_out => Write_Enable_DEBuffer_EMBuffer, writeRegAddr => data_FDBuffer_regFile(2 DOWNTO 0),
 		imm_enable_out => Imm_Enable_DEBUffer_Mux, alu_enable_out => Alu_Enable_DEBuffer_Alu, writeRegAddr_out => write_reg_out_DEBuffer_EMBuffer, INT => INT_Controller, INT_out => DE_INT, RTI => RTI_Controller, RTI_out => DE_RTI,
-		IN_PORT => FD_IP, IN_PORT_DE => DE_IP, Stall => stall_DE, instruction_DE_IN => Instuction_instructioncache_FDBuffer, instruction_DE_OUT => instructionDE, ALU_CODE_DE_IN => ALU_OPCODE, ALU_CODE_DE_OUT => ALU_CODE_DE);
+		IN_PORT => FD_IP, IN_PORT_DE => DE_IP, Stall => stall_DE, instruction_DE_IN => Instuction_instructioncache_FDBuffer,
+		instruction_DE_OUT => instructionDE, ALU_CODE_DE_IN => ALU_OPCODE, ALU_CODE_DE_OUT => ALU_CODE_DE, DE_Flush => flush_HDU(1));
 
 	U10 : Demux2 PORT MAP(F => ImmValue_DEBuffer_Demux, Sel => ALUImm_DEBuffer_Demux, A => ImmValue_Demux_Alu, B => ImmValue_Demux_EMBuffer);
 
+	U23 : mux2 PORT MAP(in0 => ReadData2Out_DEBuffer_Alu, in1 => ImmValue_Demux_Alu, sel => Imm_Enable_DEBUffer_Mux, out1 => op2_imm_mux);
+
+	U24 : mux2 PORT MAP(in1 => op2_imm_mux, in0 => Forwarded_Data2, sel => FW_OP2(0), out1 => op2_imm_forward);
+
+	U25 : mux2 PORT MAP(in1 => ReadData1Out_DEBuffer_Alu, in0 => Forwarded_Data1, sel => FW_OP1(0), out1 => op1_forward);
+
 	U11 : ALU PORT MAP(
-		EN => Alu_Enable_DEBuffer_Alu, in1 => ReadData1Out_DEBuffer_Alu, in2 => ReadData2Out_DEBuffer_Alu, op => ALU_OPCODE,
+		EN => Alu_Enable_DEBuffer_Alu, in1 => op1_forward, in2 => op2_imm_forward, op => ALU_OPCODE,
 		out_alu => Alu_Output_EMBuffer, ccr => CCR_signal, rst => reset);
 
 	Exception <= violation_sig OR CCR_signal(3);
-
-	U12 : HDU PORT MAP(
-		INT_Enable => INT_controller, MemR => memoryRead_controller, MemW => memoryWrite_controller,
-		protection_violation => Exception,
-		EA => Demux_output_DEBuffer,
-		Instruction => instructionDE,
-		Previous_instruction => Instuction_instructioncache_FDBuffer,
-		Forward_op1 => FW_OP1,
-		Forward_op2 => FW_OP2,
-		Alu_control => ALU_CODE_DE,
-		Alu_control_prev => ALU_OPCODE,
-		Stall => stall_HDU,
-		Flush => stall_HDU);
 
 	U13 : EMBuffer PORT MAP(
 		clk => clk, write_enable => Write_Enable_DEBuffer_EMBuffer, reset => rst_controller, memoryread => MemoryRead_DEBuffer_EMBuffer,
@@ -364,7 +365,7 @@ BEGIN
 		memoryread_out => Memory_Read_EMBuffer_DataMemory, memorywrite_out => Memory_write_EMBuffer_DataMemory, writeRegAddr_out => write_reg_out_EMBuffer_MWBuffer,
 		alu_result_out => AluResult_EMBuffer_DataMemory, imm_value_out => ImmValue_EMBuffer, dataout1 => ReadData1_EM_Buffer, dataout2 => ReadData2_EM_Buffer,
 		writeRegAddr => write_reg_out_DEBuffer_EMBuffer, imm_enable_out => Imm_Enable_EMBuffer, INT => DE_INT, INT_out => EM_INT, RTI => DE_RTI, RTI_out => EM_RTI, CCR => CCR_signal, CCR_out => CCR_EM,
-		IN_PORT => DE_IP, IN_PORT_EM => EM_IP);
+		IN_PORT => DE_IP, IN_PORT_EM => EM_IP, EM_Flush => flush_HDU(2));
 
 	U14 : DataMemory PORT MAP(
 		rst => rst_controller, memoryWrite => Memory_write_EMBuffer_DataMemory, memoryRead => Memory_Read_EMBuffer_DataMemory,
@@ -375,25 +376,36 @@ BEGIN
 
 	U15 : CCR PORT MAP(CCR_IN => CCR_DM, CCR_OUT => CCR_OP);
 
+	U12 : HDU PORT MAP(
+		INT_Enable => INT_controller, MemR => memoryRead_controller, MemW => memoryWrite_controller,
+		protection_violation => Exception,
+		EA => Demux_output_DEBuffer,
+		Instruction => instructionDE,
+		Forward_op1 => FW_OP1, Forward_op2 => FW_OP2, Stall => stall_HDU, Flush => flush_HDU,
+		Rdst_ExMem => write_reg_out_DEBuffer_EMBuffer, Rdst_MemWb => write_reg_out_EMBuffer_MWBuffer, WE_ExMem => Write_Enable_DEBuffer_EMBuffer,
+		WE_MemWb => Write_enable_EMBuffer_MWBuffer);
+
 	U16 : MWBuffer PORT MAP(
 		clk => clk, reset => rst_controller, write_enable => Write_enable_EMBuffer_MWBuffer,
 		readdata2 => ReadData2Out_DEBuffer_Alu,
-		alu_result => AluResult_EMBuffer_DataMemory, write_enable_out => Write_Enable_MWBuffer_Mux, readdata2_out => ReadData2_MWBuffer_Mux, alu_result_out => AluResult_MWBuffer_Mux, writeRegAddr => write_reg_out_EMBuffer_MWBuffer,
+		alu_result => AluResult_EMBuffer_DataMemory, write_enable_out => Write_Enable_MWBuffer_Mux, readdata2_out => ReadData2_MWBuffer_Mux,
+		alu_result_out => AluResult_MWBuffer_Mux, writeRegAddr => write_reg_out_EMBuffer_MWBuffer,
 		writeRegAddr_out => writeAdd_WBBuffer_RefFile, imm_value => ImmValue_EMBuffer, imm_value_out => ImmValue_MWBuffer,
-		imm_enable => Imm_Enable_EMBuffer, imm_enable_out => Imm_Enable_MWBuffer, IN_PORT => EM_IP, IN_PORT_MW => MW_IP, ReadData1 => ReadData1_EM_Buffer, ReadData1_MW => ReadData1_MW_Buffer);
+		imm_enable => Imm_Enable_EMBuffer, imm_enable_out => Imm_Enable_MWBuffer, IN_PORT => EM_IP, IN_PORT_MW => MW_IP,
+		ReadData1 => ReadData1_EM_Buffer, ReadData1_MW => ReadData1_MW_Buffer, FW_op1 => FW_OP1, FW_op2 => FW_OP2, FW_op1_out => FW_OP1_sig,
+		FW_op2_out => FW_OP2_sig, MW_Flush => flush_HDU(3));
 
 	outputport <= ReadData1_MW_Buffer;
 
 	U17 : ForwardingUnit PORT MAP(
-		Forward_Sig => FW_Sig,
-		ALU_Result => alu_result_MW,
-		MEM_Loaded => ReadData_DataMemory_MWBuffer,
-		Forwarded_data => Forwarded_Data
-	);
+		Forward_op1 => FW_OP1_sig, Forward_op2 => FW_OP2_sig,
+		ALU_Result => AluResult_EMBuffer_DataMemory,
+		MEM_Loaded => writedata_WBBuffer_RefFile,
+		Forwarded_data_op1 => Forwarded_Data1, Forwarded_data_op2 => Forwarded_Data2);
 
 	U18 : mux2 PORT MAP(in0 => AluResult_MWBuffer_Mux, in1 => ImmValue_MWBuffer, sel => Imm_Enable_MWBuffer, out1 => Alu_Imm_mux);
 
-	U19 : mux2 PORT MAP(in0 => ReadData1_MWBuffer_Mux, in1 => Alu_Imm_mux, sel => Write_Enable_MWBuffer_Mux, out1 => writedata_WBBuffer_RefFile);
+	U19 : mux2 PORT MAP(in0 => ReadData1_MW_Buffer, in1 => Alu_Imm_mux, sel => Write_Enable_MWBuffer_Mux, out1 => writedata_WBBuffer_RefFile);
 
 	U20 : mux2 PORT MAP(in0 => writedata_WBBuffer_RefFile, in1 => MW_IP, sel => IN_PORT_EN, out1 => write_data1_regfile);
 

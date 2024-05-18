@@ -5,12 +5,14 @@ USE IEEE.NUMERIC_STD.ALL;
 ENTITY MWBuffer IS
 	PORT (
 		--inputs
+		MW_Flush : IN STD_LOGIC;
 		clk, reset, write_enable : IN STD_LOGIC;
 		writeRegAddr : IN STD_LOGIC_VECTOR (2 DOWNTO 0);
 		readdata2, alu_result : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
-		alu_result_out : out std_logic_vector(31 downto 0);
+		alu_result_out : OUT STD_LOGIC_VECTOR(31 DOWNTO 0);
 		imm_value : IN STD_LOGIC_VECTOR (31 DOWNTO 0);
 		imm_enable : IN STD_LOGIC;
+		FW_op1, FW_op2 : IN STD_LOGIC_VECTOR (1 DOWNTO 0);
 		--outputs
 		write_enable_out : OUT STD_LOGIC;
 		imm_enable_out : OUT STD_LOGIC;
@@ -20,6 +22,7 @@ ENTITY MWBuffer IS
 		IN_PORT : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
 		IN_PORT_MW : OUT STD_LOGIC_VECTOR(31 DOWNTO 0);
 		ReadData1 : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
+		FW_op1_out, FW_op2_out : OUT STD_LOGIC_VECTOR (1 DOWNTO 0);
 		ReadData1_MW : OUT STD_LOGIC_VECTOR(31 DOWNTO 0)
 	);
 END MWBuffer;
@@ -30,15 +33,17 @@ BEGIN
 	BEGIN
 		IF reset = '1' THEN
 			write_enable_out <= '0';
-			readdata2_out <= (others => '0');
+			readdata2_out <= (OTHERS => '0');
 			alu_result_out <= (OTHERS => '0');
 			writeRegAddr_out <= (OTHERS => '0');
 			imm_value_out <= (OTHERS => '0');
 			imm_enable_out <= '0';
 			IN_PORT_MW <= (OTHERS => '0');
 			ReadData1_MW <= (OTHERS => '0');
+			FW_op1_out <= (OTHERS => '0');
+			FW_op2_out <= (OTHERS => '0');
 		ELSE
-			IF rising_edge(clk) THEN
+			IF rising_edge(clk) AND MW_Flush = '0' THEN
 				write_enable_out <= write_enable;
 				readdata2_out <= readdata2;
 				alu_result_out <= alu_result;
@@ -47,6 +52,19 @@ BEGIN
 				imm_enable_out <= imm_enable;
 				IN_PORT_MW <= IN_PORT;
 				ReadData1_MW <= ReadData1;
+				FW_op1_out <= FW_op1;
+				FW_op2_out <= FW_op2;
+			ELSIF rising_edge(clk) AND MW_Flush = '1' THEN
+				write_enable_out <= '0';
+				readdata2_out <= (OTHERS => '0');
+				alu_result_out <= (OTHERS => '0');
+				writeRegAddr_out <= (OTHERS => '0');
+				imm_value_out <= (OTHERS => '0');
+				imm_enable_out <= '0';
+				IN_PORT_MW <= (OTHERS => '0');
+				ReadData1_MW <= (OTHERS => '0');
+				FW_op1_out <= (OTHERS => '0');
+				FW_op2_out <= (OTHERS => '0');
 			END IF;
 		END IF;
 	END PROCESS;
