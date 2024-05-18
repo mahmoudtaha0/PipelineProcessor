@@ -19,7 +19,7 @@ def Assemble():
     instruction=""
     IMM=""
     inputfile=label1Entry.get()                             #getting input file name with its format
-    file_path = join(current_dir, inputfile+".txt")                #working in the same directory as the code
+    file_path = join(current_dir, inputfile)                #working in the same directory as the code
     outputfile="./"+label2Entry.get()                #setting the output file format to ".mem" file, can be changed according to desired output file format
     output_path= join(current_dir, outputfile+".mem")  
 
@@ -99,9 +99,9 @@ def Assemble():
                         elif operands[0] == "MOV":
                             opcode="0101000"
                             Rsrc1=register_to_binary(operands[2])
-                            print(Rsrc1)
+                            # print(Rsrc1)
                             Rdest=register_to_binary(operands[1])
-                            print(Rdest)
+                            # print(Rdest)
                             instruction=(opcode+Rsrc1+"000"+Rdest)
 
                         elif operands[0] == "SWAP":
@@ -120,6 +120,7 @@ def Assemble():
 
                         elif operands[0] == "ADDI":
                             opcode="0111000"
+                            # ADDI R3, Imm
                             Rdest=register_to_binary(operands[1])
                             IMM=operands[3]
                             IMMflag=True

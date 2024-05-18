@@ -35,9 +35,9 @@ BEGIN
     -- Forward(1) <= '1' when Instruction(15 downto 9) = -- "LDD,LDM,MOV ..etc" --modify with corresponding opcodes
     -- else '0' --ALU
 
-    Forward_op1 <= "01" WHEN (Rdst_ExMem = Instruction(8 DOWNTO 6)) AND WE_ExMem = '1' -- ALU_ALU forward
+    Forward_op1 <= "01" WHEN ((Rdst_ExMem = Instruction(8 DOWNTO 6)) AND WE_ExMem = '1') OR (Instruction(15 downto 14) = "00" AND Rdst_ExMem = Instruction(2 DOWNTO 0)) -- ALU_ALU forward
         ELSE
-        "11" WHEN (Rdst_MemWb = Instruction(8 DOWNTO 6)) AND WE_MemWb = '1' -- MEM_ALU forward
+        "11" WHEN ((Rdst_MemWb = Instruction(8 DOWNTO 6)) AND WE_MemWb = '1') OR (Instruction(15 downto 14) = "00" AND Rdst_MemWb = Instruction(2 DOWNTO 0)) -- MEM_ALU forward
         ELSE
         "00"; -- no forward
 

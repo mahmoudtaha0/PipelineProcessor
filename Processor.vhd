@@ -54,29 +54,29 @@ ARCHITECTURE my_model OF Processor IS
 		PORT (
 			-- inputs
 			DE_Flush : IN STD_LOGIC;
-        readdata1, readdata2 : IN STD_LOGIC_VECTOR (31 DOWNTO 0);
-        writeRegAddr : IN STD_LOGIC_VECTOR (2 DOWNTO 0);
-        instruction_DE_IN : IN STD_LOGIC_VECTOR(15 DOWNTO 0);
-        instruction_DE_OUT : OUT STD_LOGIC_VECTOR(15 DOWNTO 0);
-        ALU_CODE_DE_IN : IN STD_LOGIC_VECTOR(3 DOWNTO 0);
-        ALU_CODE_DE_OUT : OUT STD_LOGIC_VECTOR(3 DOWNTO 0);
-        --pc: in std_logic_vector (31 downto 0);
-        clk, imm_enable, reset, aluimm, alu_enable, write_enable, memorywrite, memoryread : IN STD_LOGIC;
-        imm_value : IN STD_LOGIC_VECTOR (15 DOWNTO 0);
-        opcode : IN STD_LOGIC_VECTOR (6 DOWNTO 0);
-        out_port_in, in_port_en : IN STD_LOGIC;
-        --call_enable,return_enable: in std_logic;
-        -- outputs
-        readdata1_out, readdata2_out, imm_value_out : OUT STD_LOGIC_VECTOR (31 DOWNTO 0);
-        memoryread_out, memorywrite_out, write_enable_out, alu_enable_out, aluimm_out, imm_enable_out : OUT STD_LOGIC;
-        writeRegAddr_out : OUT STD_LOGIC_VECTOR (2 DOWNTO 0);
-        opcode_out : OUT STD_LOGIC_VECTOR (6 DOWNTO 0);
-        INT, RTI : IN STD_LOGIC;
-        Stall : IN STD_LOGIC;
-        INT_out, RTI_out : OUT STD_LOGIC;
-        IN_PORT : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
-        out_port_out,in_port_en_out : OUT STD_LOGIC;
-        IN_PORT_DE : OUT STD_LOGIC_VECTOR(31 DOWNTO 0)
+			readdata1, readdata2 : IN STD_LOGIC_VECTOR (31 DOWNTO 0);
+			writeRegAddr : IN STD_LOGIC_VECTOR (2 DOWNTO 0);
+			instruction_DE_IN : IN STD_LOGIC_VECTOR(15 DOWNTO 0);
+			instruction_DE_OUT : OUT STD_LOGIC_VECTOR(15 DOWNTO 0);
+			ALU_CODE_DE_IN : IN STD_LOGIC_VECTOR(3 DOWNTO 0);
+			ALU_CODE_DE_OUT : OUT STD_LOGIC_VECTOR(3 DOWNTO 0);
+			--pc: in std_logic_vector (31 downto 0);
+			clk, imm_enable, reset, aluimm, alu_enable, write_enable, memorywrite, memoryread : IN STD_LOGIC;
+			imm_value : IN STD_LOGIC_VECTOR (15 DOWNTO 0);
+			opcode : IN STD_LOGIC_VECTOR (6 DOWNTO 0);
+			out_port_in, in_port_en : IN STD_LOGIC;
+			--call_enable,return_enable: in std_logic;
+			-- outputs
+			readdata1_out, readdata2_out, imm_value_out : OUT STD_LOGIC_VECTOR (31 DOWNTO 0);
+			memoryread_out, memorywrite_out, write_enable_out, alu_enable_out, aluimm_out, imm_enable_out : OUT STD_LOGIC;
+			writeRegAddr_out : OUT STD_LOGIC_VECTOR (2 DOWNTO 0);
+			opcode_out : OUT STD_LOGIC_VECTOR (6 DOWNTO 0);
+			INT, RTI : IN STD_LOGIC;
+			Stall : IN STD_LOGIC;
+			INT_out, RTI_out : OUT STD_LOGIC;
+			IN_PORT : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
+			out_port_out, in_port_en_out : OUT STD_LOGIC;
+			IN_PORT_DE : OUT STD_LOGIC_VECTOR(31 DOWNTO 0)
 			--pc_out: out std_logic_vector (31 downto 0)
 			--return_enable_out,call_enable_out : out std_logic;
 		);
@@ -110,29 +110,29 @@ ARCHITECTURE my_model OF Processor IS
 		PORT (
 			--inputs
 			EM_Flush : IN STD_LOGIC;
-		clk, write_enable, reset, memoryread, memorywrite : IN STD_LOGIC;
-		writeRegAddr : IN STD_LOGIC_VECTOR (2 DOWNTO 0);
-		--return_enable,call_enable,overflow,zeroflag : in std_logic;;
-		alu_result, datain1, datain2 : IN STD_LOGIC_VECTOR (31 DOWNTO 0); --readdata2 ely tal3 mn register file 3shan yro7 ll data memory
-		--pc: in std_logic_vector (31 downto 0);
-		imm_value : IN STD_LOGIC_VECTOR (31 DOWNTO 0);
-		imm_enable,in_port_en : IN STD_LOGIC;
-		out_port_in : IN STD_LOGIC;
-		--outputs
-		write_enable_out, memoryread_out, memorywrite_out : OUT STD_LOGIC;
-		alu_result_out, dataout1, dataout2 : OUT STD_LOGIC_VECTOR (31 DOWNTO 0);
-		imm_value_out : OUT STD_LOGIC_VECTOR (31 DOWNTO 0);
-		imm_enable_out : OUT STD_LOGIC;
-		--return_enable_out,call_enable_out,overflow_out,zeroflag_out: out std_logic;
-		--pc_out: out std_logic_vector (31 downto 0);
-		writeRegAddr_out : OUT STD_LOGIC_VECTOR (2 DOWNTO 0);
-		INT, RTI : IN STD_LOGIC;
-		INT_out, RTI_out : OUT STD_LOGIC;
-		CCR : IN STD_LOGIC_VECTOR(3 DOWNTO 0);
-		CCR_out : OUT STD_LOGIC_VECTOR(3 DOWNTO 0);
-		IN_PORT : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
-		out_port_out,in_port_en_out : OUT STD_LOGIC;
-		IN_PORT_EM : OUT STD_LOGIC_VECTOR(31 DOWNTO 0)
+			clk, write_enable, reset, memoryread, memorywrite : IN STD_LOGIC;
+			writeRegAddr : IN STD_LOGIC_VECTOR (2 DOWNTO 0);
+			--return_enable,call_enable,overflow,zeroflag : in std_logic;;
+			alu_result, datain1, datain2 : IN STD_LOGIC_VECTOR (31 DOWNTO 0); --readdata2 ely tal3 mn register file 3shan yro7 ll data memory
+			--pc: in std_logic_vector (31 downto 0);
+			imm_value : IN STD_LOGIC_VECTOR (31 DOWNTO 0);
+			imm_enable, in_port_en : IN STD_LOGIC;
+			out_port_in : IN STD_LOGIC;
+			--outputs
+			write_enable_out, memoryread_out, memorywrite_out : OUT STD_LOGIC;
+			alu_result_out, dataout1, dataout2 : OUT STD_LOGIC_VECTOR (31 DOWNTO 0);
+			imm_value_out : OUT STD_LOGIC_VECTOR (31 DOWNTO 0);
+			imm_enable_out : OUT STD_LOGIC;
+			--return_enable_out,call_enable_out,overflow_out,zeroflag_out: out std_logic;
+			--pc_out: out std_logic_vector (31 downto 0);
+			writeRegAddr_out : OUT STD_LOGIC_VECTOR (2 DOWNTO 0);
+			INT, RTI : IN STD_LOGIC;
+			INT_out, RTI_out : OUT STD_LOGIC;
+			CCR : IN STD_LOGIC_VECTOR(3 DOWNTO 0);
+			CCR_out : OUT STD_LOGIC_VECTOR(3 DOWNTO 0);
+			IN_PORT : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
+			out_port_out, in_port_en_out : OUT STD_LOGIC;
+			IN_PORT_EM : OUT STD_LOGIC_VECTOR(31 DOWNTO 0)
 		);
 	END COMPONENT;
 	COMPONENT DataMemory IS
@@ -151,26 +151,26 @@ ARCHITECTURE my_model OF Processor IS
 	COMPONENT MWBuffer IS
 		PORT (
 			MW_Flush : IN STD_LOGIC;
-		clk, reset, write_enable : IN STD_LOGIC;
-		writeRegAddr : IN STD_LOGIC_VECTOR (2 DOWNTO 0);
-		readdata2, alu_result : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
-		alu_result_out : OUT STD_LOGIC_VECTOR(31 DOWNTO 0);
-		imm_value : IN STD_LOGIC_VECTOR (31 DOWNTO 0);
-		imm_enable : IN STD_LOGIC;
-		FW_op1, FW_op2 : IN STD_LOGIC_VECTOR (1 DOWNTO 0);
-		out_port_in,in_port_en : IN STD_LOGIC;
-		--outputs
-		write_enable_out : OUT STD_LOGIC;
-		imm_enable_out : OUT STD_LOGIC;
-		readdata2_out : OUT STD_LOGIC_VECTOR(31 DOWNTO 0);
-		imm_value_out : OUT STD_LOGIC_VECTOR (31 DOWNTO 0);
-		writeRegAddr_out : OUT STD_LOGIC_VECTOR (2 DOWNTO 0);
-		IN_PORT : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
-		IN_PORT_MW : OUT STD_LOGIC_VECTOR(31 DOWNTO 0);
-		ReadData1 : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
-		FW_op1_out, FW_op2_out : OUT STD_LOGIC_VECTOR (1 DOWNTO 0);
-		out_port_out,in_port_en_out : OUT STD_LOGIC;
-		ReadData1_MW : OUT STD_LOGIC_VECTOR(31 DOWNTO 0)
+			clk, reset, write_enable : IN STD_LOGIC;
+			writeRegAddr : IN STD_LOGIC_VECTOR (2 DOWNTO 0);
+			readdata2, alu_result : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
+			alu_result_out : OUT STD_LOGIC_VECTOR(31 DOWNTO 0);
+			imm_value : IN STD_LOGIC_VECTOR (31 DOWNTO 0);
+			imm_enable : IN STD_LOGIC;
+			FW_op1, FW_op2 : IN STD_LOGIC_VECTOR (1 DOWNTO 0);
+			out_port_in, in_port_en : IN STD_LOGIC;
+			--outputs
+			write_enable_out : OUT STD_LOGIC;
+			imm_enable_out : OUT STD_LOGIC;
+			readdata2_out : OUT STD_LOGIC_VECTOR(31 DOWNTO 0);
+			imm_value_out : OUT STD_LOGIC_VECTOR (31 DOWNTO 0);
+			writeRegAddr_out : OUT STD_LOGIC_VECTOR (2 DOWNTO 0);
+			IN_PORT : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
+			IN_PORT_MW : OUT STD_LOGIC_VECTOR(31 DOWNTO 0);
+			ReadData1 : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
+			FW_op1_out, FW_op2_out : OUT STD_LOGIC_VECTOR (1 DOWNTO 0);
+			out_port_out, in_port_en_out : OUT STD_LOGIC;
+			ReadData1_MW : OUT STD_LOGIC_VECTOR(31 DOWNTO 0)
 		);
 	END COMPONENT;
 	COMPONENT Controller IS
@@ -178,9 +178,9 @@ ARCHITECTURE my_model OF Processor IS
 			opcode : IN STD_LOGIC_VECTOR(6 DOWNTO 0);
 			reset_input : IN STD_LOGIC;
 			ZF : IN STD_LOGIC;
-			jump, jumpZ, rst, IN_PORT_EN,immEnable, immFlush, memoryWrite, memoryRead, returnEnable, callEnable, aluImm, writeEnable, alu_enable, oneoperand, swap_enable, protect_enable, free_enable, push_enable, pop_enable, Out_port : OUT STD_LOGIC;
+			jump, jumpZ, rst, IN_PORT_EN, immEnable, immFlush, memoryWrite, memoryRead, returnEnable, callEnable, aluImm, writeEnable, alu_enable, oneoperand, swap_enable, protect_enable, free_enable, push_enable, pop_enable, Out_port : OUT STD_LOGIC;
 			opcode_to_alu : OUT STD_LOGIC_VECTOR(6 DOWNTO 0);
-			INT, RTI: OUT STD_LOGIC
+			INT, RTI : OUT STD_LOGIC
 		);
 	END COMPONENT;
 	COMPONENT Demux2 IS
@@ -236,7 +236,11 @@ ARCHITECTURE my_model OF Processor IS
 			-- 00: No forwarding, 01: ALU_ALU, 11: MEM_ALU
 			ALU_Result : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
 			MEM_Loaded : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
-			Forwarded_data_op1, Forwarded_data_op2 : OUT STD_LOGIC_VECTOR(31 DOWNTO 0)
+			Forwarded_data_op1, Forwarded_data_op2 : OUT STD_LOGIC_VECTOR(31 DOWNTO 0);
+			input_port : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
+			input_port_prev : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
+			input_en : IN STD_LOGIC;
+			input_en_prev : IN STD_LOGIC
 		);
 	END COMPONENT;
 
@@ -283,7 +287,7 @@ ARCHITECTURE my_model OF Processor IS
 	SIGNAL stall_DE : STD_LOGIC := '0';
 	SIGNAL violation_sig : STD_LOGIC;
 	SIGNAL Exception : STD_LOGIC := '0';
-	SIGNAL Exception_handler : STD_LOGIC_VECTOR(31 downto 0) := "00000000000000000000011111111111";
+	SIGNAL Exception_handler : STD_LOGIC_VECTOR(31 DOWNTO 0) := "00000000000000000000011111111111";
 	SIGNAL instructionDE : STD_LOGIC_VECTOR(15 DOWNTO 0);
 	SIGNAL stall_HDU : STD_LOGIC_VECTOR(3 DOWNTO 0) := (OTHERS => '0');
 	SIGNAL flush_HDU : STD_LOGIC_VECTOR(3 DOWNTO 0) := (OTHERS => '0');
@@ -293,7 +297,7 @@ ARCHITECTURE my_model OF Processor IS
 	SIGNAL FW_OP1_sig, FW_OP2_sig : STD_LOGIC_VECTOR(1 DOWNTO 0);
 	SIGNAL Forwarded_Data1, Forwarded_Data2 : STD_LOGIC_VECTOR(31 DOWNTO 0);
 	SIGNAL op2_imm_mux, op2_imm_forward, op1_forward : STD_LOGIC_VECTOR(31 DOWNTO 0);
-	SIGNAL out_port_Cont, out_port_DE, out_port_EM, out_port_MW,in_port_DE, in_port_EM, in_port_MW : STD_LOGIC;
+	SIGNAL out_port_Cont, out_port_DE, out_port_EM, out_port_MW, in_port_DE, in_port_EM, in_port_MW : STD_LOGIC;
 BEGIN
 	branch_pc <= INT_Controller OR RTI_Controller OR returnEnable_controller;
 	jump_pc <= jump_controller OR jumpZ_controller OR callEnable_controller;
@@ -338,7 +342,7 @@ BEGIN
 		clk => clk, rst => reset, write_enable => Write_Enable_MWBuffer_Mux, write_addr1 => writeAdd_WBBuffer_RefFile, write_addr2 => data_FDBuffer_regFile(2 DOWNTO 0),
 		read_addr_1 => reg_file_mux_out, read_addr_2 => data_FDBuffer_regFile(5 DOWNTO 3),
 		write_data1 => write_data1_regfile, write_data2 => write_data2_regfile, read_data_1 => ReadData1_RegFile_DEBuffer, read_data_2 => ReadData2_RegFile_DEBuffer, swap_enable => SWAP_EN);
-		--write_data1_regfile <= inputport WHEN IN_PORT_EN = '1' ELSE write_data1_regfile;
+	--write_data1_regfile <= inputport WHEN IN_PORT_EN = '1' ELSE write_data1_regfile;
 	U8 : ALU_Control PORT MAP(
 		opcode => op_code_DEBuffer_ALU, ALU_Code => ALU_OPCODE);
 
@@ -358,9 +362,9 @@ BEGIN
 
 	U23 : mux2 PORT MAP(in0 => ReadData2Out_DEBuffer_Alu, in1 => ImmValue_Demux_Alu, sel => Imm_Enable_DEBUffer_Mux, out1 => op2_imm_mux);
 
-	U24 : mux2 PORT MAP(in1 => op2_imm_mux, in0 => Forwarded_Data2, sel => FW_OP2(0), out1 => op2_imm_forward);
+	U24 : mux2 PORT MAP(in0 => op2_imm_mux, in1 => Forwarded_Data2, sel => FW_OP2_Sig(0), out1 => op2_imm_forward);
 
-	U25 : mux2 PORT MAP(in1 => ReadData1Out_DEBuffer_Alu, in0 => Forwarded_Data1, sel => FW_OP1(0), out1 => op1_forward);
+	U25 : mux2 PORT MAP(in0 => ReadData1Out_DEBuffer_Alu, in1 => Forwarded_Data1, sel => FW_OP1_Sig(0), out1 => op1_forward);
 
 	U11 : ALU PORT MAP(
 		EN => Alu_Enable_DEBuffer_Alu, in1 => op1_forward, in2 => op2_imm_forward, op => ALU_OPCODE,
@@ -375,7 +379,7 @@ BEGIN
 		memoryread_out => Memory_Read_EMBuffer_DataMemory, memorywrite_out => Memory_write_EMBuffer_DataMemory, writeRegAddr_out => write_reg_out_EMBuffer_MWBuffer,
 		alu_result_out => AluResult_EMBuffer_DataMemory, imm_value_out => ImmValue_EMBuffer, dataout1 => ReadData1_EM_Buffer, dataout2 => ReadData2_EM_Buffer,
 		writeRegAddr => write_reg_out_DEBuffer_EMBuffer, imm_enable_out => Imm_Enable_EMBuffer, INT => DE_INT, INT_out => EM_INT, RTI => DE_RTI, RTI_out => EM_RTI, CCR => CCR_signal, CCR_out => CCR_EM,
-		IN_PORT => DE_IP, IN_PORT_EM => EM_IP, EM_Flush => flush_HDU(2), out_port_in => out_port_DE, out_port_out => out_port_EM, in_port_en => in_port_DE , in_port_en_out => in_port_EM);
+		IN_PORT => DE_IP, IN_PORT_EM => EM_IP, EM_Flush => flush_HDU(2), out_port_in => out_port_DE, out_port_out => out_port_EM, in_port_en => in_port_DE, in_port_en_out => in_port_EM);
 
 	U14 : DataMemory PORT MAP(
 		rst => rst_controller, memoryWrite => Memory_write_EMBuffer_DataMemory, memoryRead => Memory_Read_EMBuffer_DataMemory,
@@ -411,7 +415,7 @@ BEGIN
 		Forward_op1 => FW_OP1_sig, Forward_op2 => FW_OP2_sig,
 		ALU_Result => AluResult_EMBuffer_DataMemory,
 		MEM_Loaded => writedata_WBBuffer_RefFile,
-		Forwarded_data_op1 => Forwarded_Data1, Forwarded_data_op2 => Forwarded_Data2);
+		Forwarded_data_op1 => Forwarded_Data1, Forwarded_data_op2 => Forwarded_Data2, input_port => MW_IP, input_en => in_port_MW, input_port_prev => EM_IP, input_en_prev => in_port_EM);
 
 	U18 : mux2 PORT MAP(in0 => AluResult_MWBuffer_Mux, in1 => ImmValue_MWBuffer, sel => Imm_Enable_MWBuffer, out1 => Alu_Imm_mux);
 
