@@ -20,7 +20,7 @@ ARCHITECTURE behavior OF ForwardingUnit IS
 BEGIN
     Forwarded_data_op1 <= ALU_Result WHEN Forward_op1 = "01" AND input_en = '0' AND input_en_prev = '0'
         ELSE
-        input_port_prev WHEN Forward_op1 = "01" AND input_en_prev = '1' AND input_en = '0'
+        input_port_prev WHEN Forward_op1 = "01" AND input_en_prev = '1'
         ELSE
         MEM_Loaded WHEN Forward_op1 = "11" AND input_en = '0'
         ELSE
@@ -30,7 +30,7 @@ BEGIN
 
     Forwarded_data_op2 <= ALU_Result WHEN Forward_op2 = "01" AND input_en = '0' AND input_en_prev = '0'
         ELSE
-        input_port_prev WHEN Forward_op2 = "01" AND input_en_prev = '1' AND input_en = '0'
+        input_port_prev WHEN Forward_op2 = "01" AND input_en_prev = '1'
         ELSE
         MEM_Loaded WHEN Forward_op2 = "11" AND input_en = '0'
         ELSE

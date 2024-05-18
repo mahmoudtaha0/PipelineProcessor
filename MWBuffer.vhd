@@ -14,6 +14,8 @@ ENTITY MWBuffer IS
 		imm_enable : IN STD_LOGIC;
 		FW_op1, FW_op2 : IN STD_LOGIC_VECTOR (1 DOWNTO 0);
 		out_port_in,in_port_en : IN STD_LOGIC;
+		aluimm : IN STD_LOGIC;
+		swap : IN STD_LOGIC;
 		--outputs
 		write_enable_out : OUT STD_LOGIC;
 		imm_enable_out : OUT STD_LOGIC;
@@ -25,6 +27,8 @@ ENTITY MWBuffer IS
 		ReadData1 : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
 		FW_op1_out, FW_op2_out : OUT STD_LOGIC_VECTOR (1 DOWNTO 0);
 		out_port_out,in_port_en_out : OUT STD_LOGIC;
+		aluimm_OUT : OUT STD_LOGIC;
+		swap_out : OUT STD_LOGIC;
 		ReadData1_MW : OUT STD_LOGIC_VECTOR(31 DOWNTO 0)
 	);
 END MWBuffer;
@@ -46,6 +50,8 @@ BEGIN
 			FW_op2_out <= (OTHERS => '0');
 			out_port_out <= '0';
 			in_port_en_out <= '0';
+			aluimm_OUT <= '0';
+			swap_out <= '0';
 		ELSE
 			IF rising_edge(clk) AND MW_Flush = '0' THEN
 				write_enable_out <= write_enable;
@@ -60,6 +66,8 @@ BEGIN
 				FW_op2_out <= FW_op2;
 				out_port_out <= out_port_in;
 				in_port_en_out <= in_port_en;
+				aluimm_OUT <= aluimm;
+				swap_out <= swap;
 			ELSIF rising_edge(clk) AND MW_Flush = '1' THEN
 				write_enable_out <= '0';
 				readdata2_out <= (OTHERS => '0');
@@ -73,6 +81,8 @@ BEGIN
 				FW_op2_out <= (OTHERS => '0');
 				out_port_out <= '0';
 				in_port_en_out <= '0';
+				aluimm_OUT <= '0';
+				swap_out <= '0';
 			END IF;
 		END IF;
 	END PROCESS;
